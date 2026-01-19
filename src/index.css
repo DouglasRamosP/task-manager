@@ -129,4 +129,12 @@
     font-weight: 100;
     font-style: italic;
   }
+
+  body {
+    /* CSS Puro */
+    background: #e6e1e17e;
+    /* Mas se quiser utilizar tailwind, também é possível
+    @apply bg-[#e6e1e17e] 
+    */
+  }
 }
