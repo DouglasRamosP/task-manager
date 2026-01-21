@@ -2,16 +2,14 @@ import CheckIcon from "../assets/icons/check.svg?react"
 import LoaderIcon from "../assets/icons/loader-circle.svg?react"
 import DetailsIcon from "../assets/icons/details.svg?react"
 
-const TaskItem = ({ task }) => {
+const TaskItem = ({ task, handleTaskCheckboxClick }) => {
   const getStatusClasses = () => {
     if (task.status === "done") {
       return "bg-[#00ADB5] text-[#00ADB5]"
     }
-
     if (task.status === "in_progress") {
       return "bg-[#FFAA04] text-[#FFAA04]"
     }
-
     if (task.status === "not_started") {
       return "bg-[#2B2D42]/10 text-[#2B2D42]"
     }
@@ -19,7 +17,7 @@ const TaskItem = ({ task }) => {
 
   return (
     <div
-      className={`flex items-center justify-between gap-2 rounded-lg bg-opacity-10 px-4 py-3 text-sm ${getStatusClasses()}`}
+      className={`flex items-center justify-between gap-2 rounded-lg bg-opacity-10 px-4 py-3 text-sm transition ${getStatusClasses()}`}
     >
       <div className="flex items-center gap-2">
         <label
@@ -29,6 +27,7 @@ const TaskItem = ({ task }) => {
             type="checkbox"
             checked={task.status === "done"}
             className="peer absolute h-full w-full cursor-pointer appearance-none rounded-lg"
+            onChange={() => handleTaskCheckboxClick(task.id)}
           />
           {/* ✓ aparece só quando checked */}
           {task.status === "done" && <CheckIcon />}
@@ -36,7 +35,6 @@ const TaskItem = ({ task }) => {
             <LoaderIcon className="animate-spin" />
           )}
         </label>
-
         {task.title}
       </div>
       <a href="#" className="transition hover:opacity-75">
