@@ -9,12 +9,20 @@ import CloudIcon from "../assets/icons/cloud-sun.svg?react"
 import TasksSeparator from "./TasksSeparator"
 import TASKS from "../constants/tasks"
 import TaskItem from "./TaskItem"
+import { toast } from "sonner"
 
 const Tasks = () => {
   const [tasks, setTasks] = useState(TASKS)
   const morningTasks = tasks.filter((task) => task.time === "morning")
   const afternoonTasks = tasks.filter((task) => task.time === "afternoon")
   const eveningTasks = tasks.filter((task) => task.time === "evening")
+
+  const handleTaskDeleteClick = (taskId) => {
+    const newtask = tasks.filter((task) => task.id !== taskId)
+
+    setTasks(newtask)
+    toast.success("Tarefa deletada com sucesso!")
+  }
 
   const handleTaskCheckboxClick = (taskId) => {
     const newTasks = tasks.map((task) => {
@@ -66,7 +74,8 @@ const Tasks = () => {
               status={task.status}
               key={task.id}
               task={task}
-              handleTaskCheckboxClick={handleTaskCheckboxClick}
+              handleCheckboxClick={handleTaskCheckboxClick}
+              handleDeleteClick={handleTaskDeleteClick}
             />
           ))}
         </div>
@@ -79,7 +88,8 @@ const Tasks = () => {
               status={task.status}
               key={task.id}
               task={task}
-              handleTaskCheckboxClick={handleTaskCheckboxClick}
+              handleCheckboxClick={handleTaskCheckboxClick}
+              handleDeleteClick={handleTaskDeleteClick}
             />
           ))}
         </div>
@@ -92,7 +102,8 @@ const Tasks = () => {
               status={task.status}
               key={task.id}
               task={task}
-              handleTaskCheckboxClick={handleTaskCheckboxClick}
+              handleCheckboxClick={handleTaskCheckboxClick}
+              handleDeleteClick={handleTaskDeleteClick}
             />
           ))}
         </div>
