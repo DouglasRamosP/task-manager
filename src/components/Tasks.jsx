@@ -7,11 +7,14 @@ import MoonIcon from "../assets/icons/moon.svg?react"
 import SunIcon from "../assets/icons/sun.svg?react"
 import TrashIcon from "../assets/icons/trash.svg?react"
 import TASKS from "../constants/tasks"
+import AddTaskDialog from "./AddTaskDialog"
 import Button from "./Button"
 import TaskItem from "./TaskItem"
 import TasksSeparator from "./TasksSeparator"
 
 const Tasks = () => {
+  const [addTaskDialogIsOpen, setAddTaskDialogIsOpen] = useState(false)
+
   const [tasks, setTasks] = useState(TASKS)
   const morningTasks = tasks.filter((task) => task.time === "morning")
   const afternoonTasks = tasks.filter((task) => task.time === "afternoon")
@@ -60,7 +63,12 @@ const Tasks = () => {
             text="Limpar tarefas"
             icon={<TrashIcon />}
           />
-          <Button variant="ghost" text="Nova tarefa" icon={<AddIcon />} />
+          <Button
+            variant="ghost"
+            text="Nova tarefa"
+            icon={<AddIcon />}
+            onClick={() => setAddTaskDialogIsOpen(true)}
+          />
         </div>
       </div>
 
@@ -106,6 +114,8 @@ const Tasks = () => {
               handleDeleteClick={handleTaskDeleteClick}
             />
           ))}
+
+          <AddTaskDialog isOpen={addTaskDialogIsOpen} />
         </div>
       </div>
     </div>
