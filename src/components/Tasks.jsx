@@ -27,6 +27,10 @@ const Tasks = () => {
     toast.success("Tarefa deletada com sucesso!")
   }
 
+  const handleDialogClosed = () => {
+    setAddTaskDialogIsOpen(false)
+  }
+
   const handleTaskCheckboxClick = (taskId) => {
     const newTasks = tasks.map((task) => {
       if (task.id !== taskId) {
@@ -115,7 +119,10 @@ const Tasks = () => {
             />
           ))}
 
-          <AddTaskDialog isOpen={addTaskDialogIsOpen} />
+          <AddTaskDialog
+            isOpen={addTaskDialogIsOpen}
+            onClose={handleDialogClosed}
+          />
         </div>
       </div>
     </div>

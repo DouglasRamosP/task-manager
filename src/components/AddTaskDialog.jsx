@@ -3,7 +3,7 @@ import { createPortal } from "react-dom"
 import Button from "./Button"
 import Input from "./Input"
 
-const AddTaskDialog = ({ isOpen }) => {
+const AddTaskDialog = ({ isOpen, onClose }) => {
   if (!isOpen) return null
 
   return createPortal(
@@ -23,7 +23,13 @@ const AddTaskDialog = ({ isOpen }) => {
             placeholder="Descreva a tarefa"
           />
           <div className="flex gap-3">
-            <Button className="w-full" size={"large"} text={"Cancelar"} />
+            <Button
+              onClick={onClose}
+              variant="secondary"
+              className="w-full"
+              size={"large"}
+              text={"Cancelar"}
+            />
             <Button className="w-full" size={"large"} text={"Salvar"} />
           </div>
         </div>

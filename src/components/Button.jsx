@@ -15,6 +15,10 @@ const Button = ({
     if (variant === "ghost") {
       return "bg-transparent text-[#818181]"
     }
+
+    if (variant === "secondary") {
+      return "bg-[#EEEEEE] text-[#35383E]"
+    }
   }
 
   const getSizeClasses = () => {
