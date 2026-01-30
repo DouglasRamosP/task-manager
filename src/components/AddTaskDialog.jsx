@@ -1,14 +1,19 @@
 import "./AddTaskDialog.css"
 
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { CSSTransition } from "react-transition-group"
+import { v4 } from "uuid"
 
 import Button from "./Button"
 import Input from "./Input"
 import InputLabel from "./InputLabel"
 
-const AddTaskDialog = ({ isOpen, onClose }) => {
+const AddTaskDialog = ({ isOpen, onClose, handleSubmit }) => {
+  const [title, setTitle] = useState()
+  const [time, setTime] = useState("morning")
+  const [description, setDescription] = useState()
+
   const nodeRef = useRef()
 
   return (
@@ -38,6 +43,8 @@ const AddTaskDialog = ({ isOpen, onClose }) => {
                   id="title"
                   label="Título"
                   placeholder="Insira o título"
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
                 />
                 <div className="flex flex-col gap-1 text-left">
                   <InputLabel htmlFor="horário">Horário</InputLabel>
@@ -45,6 +52,8 @@ const AddTaskDialog = ({ isOpen, onClose }) => {
                     className="rounded-lg border border-solid border-[#ECECEC] px-4 py-3 outline-[#00ADB5] placeholder:text-sm placeholder:text-[#9A9C9F]"
                     name=""
                     id="horario"
+                    value={time}
+                    onChange={(event) => setTime(event.target.value)}
                   >
                     <option value="morning">Manhã</option>
                     <option value="afternoon">Tarde</option>
@@ -55,6 +64,8 @@ const AddTaskDialog = ({ isOpen, onClose }) => {
                   id="description"
                   label="Descrição"
                   placeholder="Descreva a tarefa"
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
                 />
                 <div className="flex gap-3">
                   <Button
@@ -64,7 +75,21 @@ const AddTaskDialog = ({ isOpen, onClose }) => {
                     size={"large"}
                     text={"Cancelar"}
                   />
-                  <Button className="w-full" size={"large"} text={"Salvar"} />
+                  <Button
+                    className="w-full"
+                    size={"large"}
+                    text={"Salvar"}
+                    onClick={() => {
+                      handleSubmit({
+                        id: v4(),
+                        title,
+                        description,
+                        time,
+                        status: "not_started",
+                      })
+                      onClose()
+                    }}
+                  />
                 </div>
               </div>
             </div>
