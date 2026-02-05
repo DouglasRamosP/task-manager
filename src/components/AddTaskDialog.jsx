@@ -11,9 +11,10 @@ import Input from "./Input"
 import InputLabel from "./InputLabel"
 
 const AddTaskDialog = ({ isOpen, onClose, handleSubmit }) => {
-  const [title, setTitle] = useState()
+  const [title, setTitle] = useState("")
   const [time, setTime] = useState("morning")
-  const [description, setDescription] = useState()
+  const [description, setDescription] = useState("")
+  const [errors, setErrors] = useState([])
 
   const nodeRef = useRef()
 
@@ -24,6 +25,52 @@ const AddTaskDialog = ({ isOpen, onClose, handleSubmit }) => {
       setDescription("")
     }
   }, [isOpen])
+
+  useEffect(() => {
+    console.log("Erros atualizados:", errors)
+  }, [errors])
+
+  const handleSaveClick = () => {
+    const newErrors = []
+
+    if (!title.trim()) {
+      newErrors.push({ inputName: "title", message: "O título é obrigatório." })
+    }
+
+    if (!time.trim()) {
+      newErrors.push({ inputName: "time", message: "O horário é obrigatório." })
+    }
+
+    if (!description.trim()) {
+      newErrors.push({
+        inputName: "description",
+        message: "A descrição é obrigatória.",
+      })
+    }
+
+    setErrors(newErrors)
+
+    if (newErrors.length > 0) {
+      return setTitle("")
+    }
+
+    handleSubmit({
+      id: v4(),
+      title: title.trim(),
+      description: description.trim(),
+      time,
+      status: "not_started",
+    })
+
+    toast.success("Tarefa adicionada com sucesso!")
+    onClose()
+  }
+
+  const titleError = errors.find((error) => error.inputName === "title")
+  const timeError = errors.find((error) => error.inputName === "time")
+  const descriptionError = errors.find(
+    (error) => error.inputName === "description"
+  )
 
   return (
     <CSSTransition
@@ -54,15 +101,18 @@ const AddTaskDialog = ({ isOpen, onClose, handleSubmit }) => {
                   placeholder="Insira o título"
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
+                  error={titleError}
                 />
+
                 <div className="flex flex-col gap-1 text-left">
-                  <InputLabel htmlFor="horário">Horário</InputLabel>
+                  <InputLabel htmlFor="horario">Horário</InputLabel>
                   <select
                     className="rounded-lg border border-solid border-[#ECECEC] px-4 py-3 outline-[#00ADB5] placeholder:text-sm placeholder:text-[#9A9C9F]"
                     name=""
                     id="horario"
                     value={time}
                     onChange={(event) => setTime(event.target.value)}
+                    error={timeError}
                   >
                     <option value="morning">Manhã</option>
                     <option value="afternoon">Tarde</option>
@@ -75,7 +125,9 @@ const AddTaskDialog = ({ isOpen, onClose, handleSubmit }) => {
                   placeholder="Descreva a tarefa"
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
+                  error={descriptionError}
                 />
+
                 <div className="flex gap-3">
                   <Button
                     onClick={onClose}
@@ -88,29 +140,12 @@ const AddTaskDialog = ({ isOpen, onClose, handleSubmit }) => {
                     className="w-full"
                     size={"large"}
                     text={"Salvar"}
-                    onClick={() => {
-                      if (
-                        !title.trim() ||
-                        !time.trim() ||
-                        !description.trim()
-                      ) {
-                        return toast.warning("Preencha todos os campos")
-                      }
-                      handleSubmit({
-                        id: v4(),
-                        title,
-                        description,
-                        time,
-                        status: "not_started",
-                      })
-                      onClose()
-                    }}
+                    onClick={() => handleSaveClick()}
                   />
                 </div>
               </div>
             </div>
           </div>,
-
           document.body
         )}
       </div>
