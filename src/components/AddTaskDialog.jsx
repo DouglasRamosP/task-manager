@@ -11,18 +11,16 @@ import Input from "./Input"
 import InputLabel from "./InputLabel"
 
 const AddTaskDialog = ({ isOpen, onClose, handleSubmit }) => {
-  const [title, setTitle] = useState("")
   const [time, setTime] = useState("morning")
-  const [description, setDescription] = useState("")
   const [errors, setErrors] = useState([])
 
   const nodeRef = useRef()
+  const titleRef = useRef()
+  const descriptionRef = useRef()
 
   useEffect(() => {
     if (!isOpen) {
-      setTitle("")
       setTime("morning")
-      setDescription("")
     }
   }, [isOpen])
 
@@ -33,7 +31,7 @@ const AddTaskDialog = ({ isOpen, onClose, handleSubmit }) => {
   const handleSaveClick = () => {
     const newErrors = []
 
-    if (!title.trim()) {
+    if (!titleRef.current.value.trim()) {
       newErrors.push({ inputName: "title", message: "O título é obrigatório." })
     }
 
@@ -41,7 +39,7 @@ const AddTaskDialog = ({ isOpen, onClose, handleSubmit }) => {
       newErrors.push({ inputName: "time", message: "O horário é obrigatório." })
     }
 
-    if (!description.trim()) {
+    if (!descriptionRef.current.value.trim()) {
       newErrors.push({
         inputName: "description",
         message: "A descrição é obrigatória.",
@@ -51,13 +49,13 @@ const AddTaskDialog = ({ isOpen, onClose, handleSubmit }) => {
     setErrors(newErrors)
 
     if (newErrors.length > 0) {
-      return setTitle("")
+      return
     }
 
     handleSubmit({
       id: v4(),
-      title: title.trim(),
-      description: description.trim(),
+      title: titleRef.current.value,
+      description: descriptionRef.current.value.trim(),
       time,
       status: "not_started",
     })
@@ -99,9 +97,8 @@ const AddTaskDialog = ({ isOpen, onClose, handleSubmit }) => {
                   id="title"
                   label="Título"
                   placeholder="Insira o título"
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
                   error={titleError}
+                  ref={titleRef}
                 />
 
                 <div className="flex flex-col gap-1 text-left">
@@ -123,9 +120,8 @@ const AddTaskDialog = ({ isOpen, onClose, handleSubmit }) => {
                   id="description"
                   label="Descrição"
                   placeholder="Descreva a tarefa"
-                  value={description}
-                  onChange={(event) => setDescription(event.target.value)}
                   error={descriptionError}
+                  ref={descriptionRef}
                 />
 
                 <div className="flex gap-3">
