@@ -85,10 +85,10 @@ const AddTaskDialog = ({ isOpen, onClose, handleSubmit }) => {
             className="fixed bottom-0 left-0 right-0 top-0 flex h-screen w-screen items-center justify-center backdrop-blur-sm"
           >
             <div className="rounded-xl bg-white p-5 text-center shadow">
-              <h2 className="text-xl font-semibold text-[#35383E]">
+              <h2 className="text-xl font-semibold text-brand-dark-blue">
                 Nova Tarefa
               </h2>
-              <p className="mb-4 mt-1 text-sm text-[#9A9C9F]">
+              <p className="mb-4 mt-1 text-sm text-brand-text-gray">
                 Insira as informações abaixo
               </p>
 
@@ -104,7 +104,7 @@ const AddTaskDialog = ({ isOpen, onClose, handleSubmit }) => {
                 <div className="flex flex-col gap-1 text-left">
                   <InputLabel htmlFor="horario">Horário</InputLabel>
                   <select
-                    className="rounded-lg border border-solid border-[#ECECEC] px-4 py-3 outline-[#00ADB5] placeholder:text-sm placeholder:text-[#9A9C9F]"
+                    className="rounded-lg border border-solid border-[#ECECEC] px-4 py-3 outline-brand-primary placeholder:text-sm placeholder:text-brand-text-gray"
                     name=""
                     id="horario"
                     value={time}

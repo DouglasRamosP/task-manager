@@ -1,6 +1,6 @@
 const InputLabel = ({ children, ...rest }) => {
   return (
-    <label className="text-sm font-semibold text-[#35383E]" {...rest}>
+    <label className="text-sm font-semibold text-brand-dark-blue" {...rest}>
       {children}
     </label>
   )
