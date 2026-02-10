@@ -36,7 +36,6 @@ const Tasks = () => {
 
     const response = await fetch(`http://localhost:3000/tasks/${taskId}`, {
       method: "DELETE",
-      body: JSON.stringify({ newtask }),
     })
     if (!response.ok) {
       return toast.error(
