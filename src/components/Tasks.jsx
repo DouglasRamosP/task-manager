@@ -13,7 +13,6 @@ import TasksSeparator from "./TasksSeparator"
 
 const Tasks = () => {
   const [addTaskDialogIsOpen, setAddTaskDialogIsOpen] = useState(false)
-
   const [tasks, setTasks] = useState([])
 
   useEffect(() => {
@@ -33,16 +32,6 @@ const Tasks = () => {
 
   const handleTaskDeleteClick = async (taskId) => {
     const newtask = tasks.filter((task) => task.id !== taskId)
-
-    const response = await fetch(`http://localhost:3000/tasks/${taskId}`, {
-      method: "DELETE",
-    })
-    if (!response.ok) {
-      return toast.error(
-        "Erro ao deletar a tarefa. Por favor, tente novamente."
-      )
-    }
-
     setTasks(newtask)
     toast.success("Tarefa deletada com sucesso!")
   }
@@ -117,7 +106,7 @@ const Tasks = () => {
               key={task.id}
               task={task}
               handleCheckboxClick={handleTaskCheckboxClick}
-              handleDeleteClick={handleTaskDeleteClick}
+              onDeleteSuccess={handleTaskDeleteClick}
             />
           ))}
         </div>
@@ -131,7 +120,7 @@ const Tasks = () => {
               key={task.id}
               task={task}
               handleCheckboxClick={handleTaskCheckboxClick}
-              handleDeleteClick={handleTaskDeleteClick}
+              onDeleteSuccess={handleTaskDeleteClick}
             />
           ))}
         </div>
@@ -145,7 +134,7 @@ const Tasks = () => {
               key={task.id}
               task={task}
               handleCheckboxClick={handleTaskCheckboxClick}
-              handleDeleteClick={handleTaskDeleteClick}
+              onDeleteSuccess={handleTaskDeleteClick}
             />
           ))}
 
