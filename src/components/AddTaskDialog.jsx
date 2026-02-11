@@ -1,66 +1,68 @@
 import "./AddTaskDialog.css"
 
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { CSSTransition } from "react-transition-group"
 import { toast } from "sonner"
 import { v4 } from "uuid"
 
+import LoaderIcon from "../assets/icons/loader-circle.svg?react"
 import Button from "./Button"
 import Input from "./Input"
 import InputLabel from "./InputLabel"
 
-const AddTaskDialog = ({ isOpen, onClose, handleSubmit }) => {
-  const [time, setTime] = useState("morning")
+const AddTaskDialog = ({ isOpen, onClose, onSubmitSuccess }) => {
   const [errors, setErrors] = useState([])
-
+  const [isLoading, setIsLoading] = useState(false)
   const nodeRef = useRef()
   const titleRef = useRef()
   const descriptionRef = useRef()
+  const timeRef = useRef()
 
-  useEffect(() => {
-    if (!isOpen) {
-      setTime("morning")
+  const handleSaveClick = async () => {
+    const title = titleRef.current.value
+    const description = descriptionRef.current.value
+    const time = timeRef.current.value
+    const task = {
+      id: v4(),
+      title,
+      time,
+      description,
+      status: "not_started",
     }
-  }, [isOpen])
-
-  useEffect(() => {
-    console.log("Erros atualizados:", errors)
-  }, [errors])
-
-  const handleSaveClick = () => {
     const newErrors = []
 
-    if (!titleRef.current.value.trim()) {
+    if (!title.trim()) {
       newErrors.push({ inputName: "title", message: "O título é obrigatório." })
     }
-
     if (!time.trim()) {
       newErrors.push({ inputName: "time", message: "O horário é obrigatório." })
     }
-
-    if (!descriptionRef.current.value.trim()) {
+    if (!description.trim()) {
       newErrors.push({
         inputName: "description",
         message: "A descrição é obrigatória.",
       })
     }
-
     setErrors(newErrors)
 
     if (newErrors.length > 0) {
       return
     }
+    setIsLoading(true)
 
-    handleSubmit({
-      id: v4(),
-      title: titleRef.current.value,
-      description: descriptionRef.current.value.trim(),
-      time,
-      status: "not_started",
+    const response = await fetch("http://localhost:3000/tasks", {
+      method: "POST",
+      body: JSON.stringify(task),
     })
-
-    toast.success("Tarefa adicionada com sucesso!")
+    if (!response.ok) {
+      setIsLoading(false)
+      return toast.error(
+        "Erro ao adicionar a tarefa. Por favor, tente novamente."
+      )
+    }
+    onSubmitSuccess(task)
+    setIsLoading(false)
     onClose()
   }
 
@@ -107,8 +109,8 @@ const AddTaskDialog = ({ isOpen, onClose, handleSubmit }) => {
                     className="rounded-lg border border-solid border-[#ECECEC] px-4 py-3 outline-brand-primary placeholder:text-sm placeholder:text-brand-text-gray"
                     name=""
                     id="horario"
-                    value={time}
-                    onChange={(event) => setTime(event.target.value)}
+                    defaultValue="morning"
+                    ref={timeRef}
                     error={timeError}
                   >
                     <option value="morning">Manhã</option>
@@ -136,8 +138,10 @@ const AddTaskDialog = ({ isOpen, onClose, handleSubmit }) => {
                     className="w-full"
                     size={"large"}
                     text={"Salvar"}
-                    onClick={() => handleSaveClick()}
-                  />
+                    onClick={handleSaveClick}
+                    disabled={isLoading}
+                    icon={isLoading && <LoaderIcon className="animate-spin" />}
+                  ></Button>
                 </div>
               </div>
             </div>
