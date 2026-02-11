@@ -101,6 +101,7 @@ const AddTaskDialog = ({ isOpen, onClose, onSubmitSuccess }) => {
                   placeholder="Insira o título"
                   error={titleError}
                   ref={titleRef}
+                  disabled={isLoading}
                 />
 
                 <div className="flex flex-col gap-1 text-left">
@@ -112,6 +113,7 @@ const AddTaskDialog = ({ isOpen, onClose, onSubmitSuccess }) => {
                     defaultValue="morning"
                     ref={timeRef}
                     error={timeError}
+                    disabled={isLoading}
                   >
                     <option value="morning">Manhã</option>
                     <option value="afternoon">Tarde</option>
@@ -124,6 +126,7 @@ const AddTaskDialog = ({ isOpen, onClose, onSubmitSuccess }) => {
                   placeholder="Descreva a tarefa"
                   error={descriptionError}
                   ref={descriptionRef}
+                  disabled={isLoading}
                 />
 
                 <div className="flex gap-3">
