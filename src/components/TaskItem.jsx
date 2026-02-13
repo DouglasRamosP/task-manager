@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { Link } from "react-router-dom"
 import { toast } from "sonner"
 
 import CheckIcon from "../assets/icons/check.svg?react"
@@ -72,9 +73,9 @@ const TaskItem = ({ task, handleCheckboxClick, onDeleteSuccess }) => {
           onClick={handleDeleteClick}
           disabled={deleteTaskIsLoading}
         />
-        <a href="#" className="transition hover:opacity-75">
-          {<DetailsIcon />}
-        </a>
+        <Link to={`/tasks/${task.id}`}>
+          <DetailsIcon />
+        </Link>
       </div>
     </div>
   )
