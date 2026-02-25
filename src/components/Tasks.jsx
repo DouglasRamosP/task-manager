@@ -40,24 +40,27 @@ const Tasks = () => {
     setAddTaskDialogIsOpen(false)
   }
 
-  const handleTaskCheckboxClick = (taskId) => {
-    const newTasks = tasks.map((task) => {
-      if (task.id !== taskId) {
-        return task
-      }
-      if (task.status === "not_started") {
-        return { ...task, status: "in_progress" }
-      }
-      if (task.status === "in_progress") {
-        return { ...task, status: "done" }
-      }
-      if (task.status === "done") {
-        return { ...task, status: "not_started" }
-      }
-      return { ...task, status: "done" }
+  const handleTaskCheckboxClick = async (taskId) => {
+    const task = tasks.find((t) => t.id === taskId)
+    if (!task) return
+
+    let nextStatus = "not_started"
+
+    if (task.status === "not_started") nextStatus = "in_progress"
+    else if (task.status === "in_progress") nextStatus = "done"
+
+    await fetch(`http://localhost:3000/tasks/${taskId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status: nextStatus }),
     })
 
-    setTasks(newTasks)
+    // refaz o GET e atualiza tudo
+    const response = await fetch("http://localhost:3000/tasks")
+    const data = await response.json()
+    setTasks(data)
   }
 
   const onTaskSubmitSuccess = async (task) => {
