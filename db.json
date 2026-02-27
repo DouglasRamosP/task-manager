@@ -1,25 +1,11 @@
 {
   "tasks": [
     {
-      "id": "0730fa71-720d-4a0c-b16e-100a200d69ff",
-      "title": "teste 1",
+      "id": "70f78fad-a227-4e1d-b48b-6d5e7b36deda",
+      "title": "SmartFit",
       "time": "morning",
-      "description": "teste 1",
-      "status": "not_started"
-    },
-    {
-      "id": "9f7a65be-b1f3-4ba0-974b-db3a7ac7b5c1",
-      "title": "teste 2",
-      "time": "afternoon",
-      "description": "teste 2",
-      "status": "not_started"
-    },
-    {
-      "id": "d0e8eb37-d5eb-4b28-968e-2a89dab5a742",
-      "title": "teste 3",
-      "time": "evening",
-      "description": "teste 3",
-      "status": "not_started"
+      "description": "ir para a academia as 8h",
+      "status": "in_progress"
     }
   ]
 }

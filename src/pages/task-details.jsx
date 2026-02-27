@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
+import { useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
 
@@ -12,6 +13,12 @@ import InputLabel from "../components/InputLabel"
 import Sidebar from "../components/Sidebar"
 
 const TaskDetailsPage = () => {
+  const {
+    register,
+    formState: { errors, isSubmitting: isLoading },
+    handleSubmit,
+    reset,
+  } = useForm()
   const { taskId } = useParams()
   const [task, setTask] = useState(null)
   const navigate = useNavigate()
@@ -26,76 +33,37 @@ const TaskDetailsPage = () => {
       })
       const data = await response.json()
       setTask(data)
-    }
-    fetchTasks()
-  }, [taskId])
 
-  const [errors, setErrors] = useState([])
-  const [isLoading, setIsLoading] = useState(false)
-  const titleRef = useRef()
-  const descriptionRef = useRef()
-  const timeRef = useRef()
-
-  const handleSaveClick = async () => {
-    setIsLoading(true)
-    const title = titleRef.current.value
-    const description = descriptionRef.current.value
-    const time = timeRef.current.value
-
-    const newErrors = []
-
-    if (!title.trim()) {
-      newErrors.push({ inputName: "title", message: "O título é obrigatório." })
-    }
-    if (!time.trim()) {
-      newErrors.push({ inputName: "time", message: "O horário é obrigatório." })
-    }
-    if (!description.trim()) {
-      newErrors.push({
-        inputName: "description",
-        message: "A descrição é obrigatória.",
+      reset({
+        title: data.title ?? "",
+        time: data.time ?? "morning",
+        description: data.description ?? "",
       })
     }
+    fetchTasks()
+  }, [taskId, reset])
 
-    setErrors(newErrors)
-    if (newErrors.length > 0) return setIsLoading(true)
-
-    const updatedTask = {
-      title,
-      description,
-      time,
-    }
-
+  const handleSaveClick = async (data) => {
     const response = await fetch(`http://localhost:3000/tasks/${taskId}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(updatedTask),
+      body: JSON.stringify(data),
     })
 
     if (!response.ok) {
-      setIsLoading(false)
       return toast.error(
         "Erro ao atualizar a tarefa. Por favor, tente novamente."
       )
     }
-
-    setIsLoading(false)
-    const data = await response.json()
-    setTask(data)
+    const updated = await response.json()
+    setTask(updated)
 
     toast.success("Tarefa atualizada com sucesso!")
   }
 
-  const titleError = errors.find((error) => error.inputName === "title")
-  const timeError = errors.find((error) => error.inputName === "time")
-  const descriptionError = errors.find(
-    (error) => error.inputName === "description"
-  )
-
   const handleTaskDeleteClick = async () => {
-    setIsLoading(true)
     await fetch(`http://localhost:3000/tasks/${taskId}`, {
       method: "DELETE",
     })
@@ -161,58 +129,75 @@ const TaskDetailsPage = () => {
           />
         </div>
         {/* dados da tarefa */}
-        <div className="mt-6 space-y-6 rounded-xl bg-brand-white p-6">
-          <div>
-            <Input
-              error={titleError}
-              ref={titleRef}
-              id="title"
-              label="Título"
-              defaultValue={task?.title}
+        <form onSubmit={handleSubmit(handleSaveClick)}>
+          <div className="mt-6 space-y-6 rounded-xl bg-brand-white p-6">
+            <div>
+              <Input
+                id="title"
+                label="Título"
+                {...register("title", {
+                  required: "O Título é obrigatório.",
+                  validate: (value) => {
+                    if (!value.trim()) {
+                      return "O título não pode ser vazio."
+                    }
+                    return true
+                  },
+                })}
+                error={errors?.title}
+              />
+            </div>
+            <div className="flex flex-col">
+              <InputLabel htmlFor="horario">Horário</InputLabel>
+              <select
+                className="rounded-lg border border-solid border-[#ECECEC] px-4 py-3 outline-brand-primary placeholder:text-sm placeholder:text-brand-text-gray"
+                name=""
+                id="horario"
+                {...register("time", {
+                  required: "O Período é obrigatório.",
+                })}
+                error={errors?.time}
+              >
+                <option value="morning">Manhã</option>
+                <option value="afternoon">Tarde</option>
+                <option value="evening">Noite</option>
+              </select>
+            </div>
+            <div>
+              <Input
+                id="description"
+                label="Descrição"
+                {...register("description", {
+                  required: "A descrição é obrigatória.",
+                  validate: (value) => {
+                    if (!value.trim()) {
+                      return "A descrição não pode ser vazia."
+                    }
+                    return true
+                  },
+                })}
+                error={errors?.description}
+              />
+            </div>
+          </div>
+          <div className="flex w-full justify-end gap-3 pt-4">
+            {/* botões cancelar e salvar */}
+            <Button
+              color="secondary"
+              size="large"
+              text="Cancelar"
+              onClick={handleTaskDeleteClick}
+            />
+            <Button
+              type="submite"
+              color="primary"
+              size="large"
+              text="Salvar"
+              disabled={isLoading}
+              icon={isLoading && <LoaderIcon className="animate-spin" />}
             />
           </div>
-          <div className="flex flex-col">
-            <InputLabel htmlFor="horario">Horário</InputLabel>
-            <select
-              className="rounded-lg border border-solid border-[#ECECEC] px-4 py-3 outline-brand-primary placeholder:text-sm placeholder:text-brand-text-gray"
-              name=""
-              id="horario"
-              defaultValue={task?.time}
-              ref={timeRef}
-              error={timeError}
-            >
-              <option value="morning">Manhã</option>
-              <option value="afternoon">Tarde</option>
-              <option value="evening">Noite</option>
-            </select>
-          </div>
-          <div>
-            <Input
-              error={descriptionError}
-              ref={descriptionRef}
-              id="description"
-              label="Descrição"
-              defaultValue={task?.description}
-            />
-          </div>
-        </div>
-        <div className="flex w-full justify-end gap-3 pt-4">
-          {/* botões cancelar e salvar */}
-          <Button
-            onClick={handleBackClick}
-            color="secondary"
-            size="large"
-            text="Cancelar"
-          />
-          <Button
-            onClick={handleSaveClick}
-            color="primary"
-            size="large"
-            text="Salvar"
-            disabled={isLoading}
-            icon={isLoading && <LoaderIcon className="animate-spin" />}
-          />
-        </div>
+        </form>
       </div>
     </div>
   )
