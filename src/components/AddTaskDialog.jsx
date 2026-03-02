@@ -1,7 +1,8 @@
 import "./AddTaskDialog.css"
 
-import { useRef, useState } from "react"
+import { useRef } from "react"
 import { createPortal } from "react-dom"
+import { useForm } from "react-hook-form"
 import { CSSTransition } from "react-transition-group"
 import { toast } from "sonner"
 import { v4 } from "uuid"
@@ -12,65 +13,52 @@ import Input from "./Input"
 import InputLabel from "./InputLabel"
 
 const AddTaskDialog = ({ isOpen, onClose, onSubmitSuccess }) => {
-  const [errors, setErrors] = useState([])
-  const [isLoading, setIsLoading] = useState(false)
   const nodeRef = useRef()
-  const titleRef = useRef()
-  const descriptionRef = useRef()
-  const timeRef = useRef()
 
-  const handleSaveClick = async () => {
-    const title = titleRef.current.value
-    const description = descriptionRef.current.value
-    const time = timeRef.current.value
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting: isLoading },
+  } = useForm({
+    defaultValues: {
+      title: "",
+      time: "",
+      description: "",
+    },
+  })
+
+  const handleSaveClick = async (data) => {
     const task = {
       id: v4(),
-      title,
-      time,
-      description,
+      title: data.title.trim(),
+      time: data.time,
+      description: data.description.trim(),
       status: "not_started",
     }
-    const newErrors = []
-
-    if (!title.trim()) {
-      newErrors.push({ inputName: "title", message: "O título é obrigatório." })
-    }
-    if (!time.trim()) {
-      newErrors.push({ inputName: "time", message: "O horário é obrigatório." })
-    }
-    if (!description.trim()) {
-      newErrors.push({
-        inputName: "description",
-        message: "A descrição é obrigatória.",
-      })
-    }
-    setErrors(newErrors)
-
-    if (newErrors.length > 0) {
-      return
-    }
-    setIsLoading(true)
 
     const response = await fetch("http://localhost:3000/tasks", {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(task),
     })
+
     if (!response.ok) {
-      setIsLoading(false)
-      return toast.error(
-        "Erro ao adicionar a tarefa. Por favor, tente novamente."
-      )
+      toast.error("Erro ao adicionar a tarefa. Por favor, tente novamente.")
+      return
     }
+
     onSubmitSuccess(task)
-    setIsLoading(false)
+    toast.success("Tarefa adicionada com sucesso!")
+
+    reset() // limpa o form
     onClose()
   }
 
-  const titleError = errors.find((error) => error.inputName === "title")
-  const timeError = errors.find((error) => error.inputName === "time")
-  const descriptionError = errors.find(
-    (error) => error.inputName === "description"
-  )
+  const handleClose = () => {
+    reset()
+    onClose()
+  }
 
   return (
     <CSSTransition
@@ -94,59 +82,79 @@ const AddTaskDialog = ({ isOpen, onClose, onSubmitSuccess }) => {
                 Insira as informações abaixo
               </p>
 
-              <div className="flex w-[336px] flex-col space-y-4">
-                <Input
-                  id="title"
-                  label="Título"
-                  placeholder="Insira o título"
-                  error={titleError}
-                  ref={titleRef}
-                  disabled={isLoading}
-                />
-
-                <div className="flex flex-col gap-1 text-left">
-                  <InputLabel htmlFor="horario">Horário</InputLabel>
-                  <select
-                    className="rounded-lg border border-solid border-[#ECECEC] px-4 py-3 outline-brand-primary placeholder:text-sm placeholder:text-brand-text-gray"
-                    name=""
-                    id="horario"
-                    defaultValue="morning"
-                    ref={timeRef}
-                    error={timeError}
-                    disabled={isLoading}
-                  >
-                    <option value="morning">Manhã</option>
-                    <option value="afternoon">Tarde</option>
-                    <option value="evening">Noite</option>
-                  </select>
-                </div>
-                <Input
-                  id="description"
-                  label="Descrição"
-                  placeholder="Descreva a tarefa"
-                  error={descriptionError}
-                  ref={descriptionRef}
-                  disabled={isLoading}
-                />
-
-                <div className="flex gap-3">
-                  <Button
-                    onClick={onClose}
-                    color="secondary"
-                    className="w-full"
-                    size={"large"}
-                    text={"Cancelar"}
+              <form onSubmit={handleSubmit(handleSaveClick)}>
+                <div className="flex w-[336px] flex-col space-y-4">
+                  <Input
+                    id="title"
+                    label="Título"
+                    placeholder="Insira o título"
+                    {...register("title", {
+                      required: "O título é obrigatório.",
+                      validate: (v) =>
+                        v.trim() !== "" || "O título não pode ser vazio.",
+                    })}
+                    error={errors.title}
                   />
-                  <Button
-                    className="w-full"
-                    size={"large"}
-                    text={"Salvar"}
-                    onClick={handleSaveClick}
-                    disabled={isLoading}
-                    icon={isLoading && <LoaderIcon className="animate-spin" />}
-                  ></Button>
+
+                  <div className="flex flex-col gap-1 text-left">
+                    <InputLabel htmlFor="time">Horário</InputLabel>
+                    <select
+                      id="time"
+                      className="rounded-lg border border-solid border-[#ECECEC] px-4 py-3 outline-brand-primary"
+                      {...register("time", {
+                        required: "O período é obrigatório.",
+                      })}
+                    >
+                      <option value="">Selecione...</option>
+                      <option value="morning">Manhã</option>
+                      <option value="afternoon">Tarde</option>
+                      <option value="evening">Noite</option>
+                    </select>
+
+                    {errors.time && (
+                      <span className="text-xs text-brand-danger">
+                        {errors.time.message}
+                      </span>
+                    )}
+                  </div>
+
+                  <Input
+                    id="description"
+                    label="Descrição"
+                    placeholder="Descreva a tarefa"
+                    {...register("description", {
+                      required: "A descrição é obrigatória.",
+                      validate: (v) =>
+                        v.trim() !== "" || "A descrição não pode ser vazia.",
+                    })}
+                    error={errors.description}
+                  />
+
+                  <div className="flex gap-3">
+                    <Button
+                      type="button"
+                      onClick={handleClose}
+                      color="secondary"
+                      className="w-full"
+                      size="large"
+                      text="Cancelar"
+                      disabled={isLoading}
+                    />
+                    <Button
+                      className="w-full"
+                      type="submit"
+                      size="large"
+                      text="Salvar"
+                      disabled={isLoading}
+                      icon={
+                        isLoading ? (
+                          <LoaderIcon className="animate-spin" />
+                        ) : null
+                      }
+                    />
+                  </div>
                 </div>
-              </div>
+              </form>
             </div>
           </div>,
           document.body
