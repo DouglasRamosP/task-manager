@@ -1,11 +1,3 @@
 {
-  "tasks": [
-    {
-      "id": "70f78fad-a227-4e1d-b48b-6d5e7b36deda",
-      "title": "SmartFit",
-      "time": "morning",
-      "description": "ir para a academia as 8h",
-      "status": "in_progress"
-    }
-  ]
+  "tasks": []
 }
