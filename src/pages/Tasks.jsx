@@ -1,9 +1,9 @@
 import { Toaster } from "sonner"
 
-import Sidebar from "./components/Sidebar"
-import Tasks from "./components/Tasks"
+import Sidebar from "../components/Sidebar"
+import Tasks from "../components/Tasks"
 
-function App() {
+function TasksPage() {
   return (
     <div className="flex">
       <Toaster />
@@ -13,4 +13,4 @@ function App() {
   )
 }
 
-export default App
+export default TasksPage

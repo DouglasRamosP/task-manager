@@ -1,6 +1,6 @@
 import { tv } from "tailwind-variants"
 
-const SidebarButton = ({ children, color }) => {
+const SidebarButton = ({ children, color, to }) => {
   const sidebar = tv({
     base: "flex gap-2 rounded-lg px-6 py-3",
     variants: {
@@ -12,7 +12,7 @@ const SidebarButton = ({ children, color }) => {
   })
 
   return (
-    <a href="#" className={sidebar({ color })}>
+    <a href={to} className={sidebar({ color })}>
       {children}
     </a>
   )
