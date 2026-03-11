@@ -52,7 +52,7 @@ const HomePage = () => {
   )
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen">
       <Toaster />
       <Sidebar />
 
