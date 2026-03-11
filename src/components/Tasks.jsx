@@ -3,13 +3,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
 
-import AddIcon from "../assets/icons/Add.svg?react"
 import CloudIcon from "../assets/icons/cloud-sun.svg?react"
 import MoonIcon from "../assets/icons/moon.svg?react"
 import SunIcon from "../assets/icons/sun.svg?react"
-import TrashIcon from "../assets/icons/trash.svg?react"
 import AddTaskDialog from "./AddTaskDialog"
-import Button from "./Button"
+import Header from "./Header"
 import TaskItem from "./TaskItem"
 import TasksSeparator from "./TasksSeparator"
 
@@ -167,30 +165,12 @@ const Tasks = () => {
 
   return (
     <div className="w-full px-8 py-16">
-      <div className="flex justify-between pb-6">
-        <div>
-          <span className="text-xs font-semibold text-brand-primary">
-            Minhas Tarefas
-          </span>
-          <h2 className="text-xl font-semibold">Minhas Tarefas</h2>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Button
-            color="ghost"
-            text="Limpar tarefas"
-            icon={<TrashIcon />}
-            onClick={() => clearTasksMutation.mutate()}
-          />
-
-          <Button
-            color="primary"
-            text="Nova tarefa"
-            icon={<AddIcon />}
-            onClick={() => setAddTaskDialogIsOpen(true)}
-          />
-        </div>
-      </div>
+      <Header
+        subtitle="Minhas Tarefas"
+        title="Minhas Tarefas"
+        onClearTasks={() => clearTasksMutation.mutate()}
+        onOpenDialog={() => setAddTaskDialogIsOpen(true)}
+      />
 
       <div className="rounded-xl bg-white p-6">
         {/* MANHÃ */}
