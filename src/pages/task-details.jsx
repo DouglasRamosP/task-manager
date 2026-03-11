@@ -31,9 +31,6 @@ const TaskDetailsPage = () => {
     navigate(-1)
   }
 
-  // =========================
-  // 1) QUERY: buscar a tarefa
-  // =========================
   const {
     data: task,
     isLoading: isLoadingTask,
@@ -44,12 +41,10 @@ const TaskDetailsPage = () => {
     enabled: !!taskId,
     queryFn: async () => {
       const { data } = await axios.get(`http://localhost:3000/tasks/${taskId}`)
-
       return data
     },
   })
 
-  // Preenche o formulário quando a task chegar
   useEffect(() => {
     if (!task) return
 
@@ -60,9 +55,6 @@ const TaskDetailsPage = () => {
     })
   }, [task, reset])
 
-  // =================================
-  // 2) MUTATION: atualizar (PATCH)
-  // =================================
   const { mutateAsync: updateTaskMutation, isPending: isUpdatingTask } =
     useMutation({
       mutationFn: async (formData) => {
@@ -74,12 +66,8 @@ const TaskDetailsPage = () => {
         return updated
       },
       onSuccess: (updated) => {
-        // Atualiza o cache da task individual
         queryClient.setQueryData(["task", taskId], updated)
-
-        // Garante que a lista (se existir) reflita alterações
         queryClient.invalidateQueries({ queryKey: ["tasks"] })
-
         toast.success("Tarefa atualizada com sucesso!")
       },
       onError: () => {
@@ -91,23 +79,15 @@ const TaskDetailsPage = () => {
     await updateTaskMutation(data)
   }
 
-  // ==============================
-  // 3) MUTATION: deletar (DELETE)
-  // ==============================
   const { mutateAsync: deleteTaskMutation, isPending: isDeletingTask } =
     useMutation({
       mutationFn: async () => {
         await axios.delete(`http://localhost:3000/tasks/${taskId}`)
-
         return true
       },
       onSuccess: () => {
-        // Remove cache da task
         queryClient.removeQueries({ queryKey: ["task", taskId] })
-
-        // Atualiza lista
         queryClient.invalidateQueries({ queryKey: ["tasks"] })
-
         toast.success("Tarefa deletada com sucesso!")
         navigate(-1)
       },
@@ -120,12 +100,11 @@ const TaskDetailsPage = () => {
     await deleteTaskMutation()
   }
 
-  // Estados de loading “certos”
   const isBusy = isUpdatingTask || isDeletingTask || isSubmittingForm
 
   if (isLoadingTask) {
     return (
-      <div className="flex">
+      <div className="flex min-h-screen">
         <Sidebar />
         <div className="w-full px-8 py-16">
           <div className="flex items-center gap-2 text-brand-text-gray">
@@ -139,7 +118,7 @@ const TaskDetailsPage = () => {
 
   if (isError) {
     return (
-      <div className="flex">
+      <div className="flex min-h-screen">
         <Sidebar />
         <div className="w-full px-8 py-16">
           <p className="text-red-600">
@@ -159,13 +138,11 @@ const TaskDetailsPage = () => {
   }
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen">
       <Sidebar />
 
       <div className="w-full px-8 py-16">
-        {/* barra do topo */}
         <div className="flex w-full justify-between">
-          {/* parte da esquerda */}
           <div>
             <button
               className="mb-3 flex h-8 w-8 items-center rounded-full bg-brand-primary"
@@ -174,7 +151,6 @@ const TaskDetailsPage = () => {
               <ArrowLeftIcon />
             </button>
 
-            {/* breadcrumb */}
             <div className="flex items-baseline gap-1 text-xs">
               <span
                 onClick={handleBackClick}
@@ -190,11 +166,9 @@ const TaskDetailsPage = () => {
               </span>
             </div>
 
-            {/* título */}
             <h1 className="mt-2 text-xl font-semibold">{task?.title}</h1>
           </div>
 
-          {/* parte da direita */}
           <Button
             className="h-fit self-end"
             color="delete"
@@ -212,7 +186,6 @@ const TaskDetailsPage = () => {
           />
         </div>
 
-        {/* dados da tarefa */}
         <form onSubmit={handleSubmit(handleSaveClick)}>
           <div className="mt-6 space-y-6 rounded-xl bg-brand-white p-6">
             <div>
@@ -262,7 +235,6 @@ const TaskDetailsPage = () => {
           </div>
 
           <div className="flex w-full justify-end gap-3 pt-4">
-            {/* botões cancelar e salvar */}
             <Button
               type="button"
               color="secondary"
