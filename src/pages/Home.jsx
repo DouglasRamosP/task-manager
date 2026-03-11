@@ -195,11 +195,14 @@ const HomePage = () => {
   )
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-brand-background">
       <Toaster />
-      <Sidebar />
 
-      <main className="w-full space-y-6 px-8 py-16">
+      <div className="w-72 shrink-0">
+        <Sidebar />
+      </div>
+
+      <main className="flex-1 space-y-6 px-8 py-16">
         <Header
           subtitle="Dashboard"
           title="Início"
@@ -225,25 +228,25 @@ const HomePage = () => {
               <Dashboard
                 icon={<TaskIcon />}
                 mainText={String(taskStats.total)}
-                secundaryText="Tarefas disponíveis"
+                secondaryText="Tarefas disponíveis"
               />
 
               <Dashboard
                 icon={<TaskCheckIcon />}
                 mainText={String(taskStats.completed)}
-                secundaryText="Tarefas concluídas"
+                secondaryText="Tarefas concluídas"
               />
 
               <Dashboard
                 icon={<LoaderIcon />}
                 mainText={String(taskStats.inProgress)}
-                secundaryText="Tarefas em andamento"
+                secondaryText="Tarefas em andamento"
               />
 
               <Dashboard
                 icon={<WaterIcon />}
                 mainText={`${waterPercentage}%`}
-                secundaryText="Água"
+                secondaryText="Água"
               />
             </div>
 
