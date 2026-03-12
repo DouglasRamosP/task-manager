@@ -37,7 +37,7 @@ const AddTaskDialog = ({ isOpen, onClose, onSubmitSuccess }) => {
       status: "not_started",
     }
 
-    const response = await fetch("http://localhost:3000/tasks", {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(task),

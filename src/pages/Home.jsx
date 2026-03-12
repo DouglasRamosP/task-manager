@@ -13,7 +13,7 @@ import TaskSummaryCard from "../components/TaskSummaryCard"
 import WaterGoalCard from "../components/WaterGoalCard"
 import Dashboard from "./Dashboard"
 
-const API_URL = "http://localhost:3000"
+const API_URL = import.meta.env.VITE_API_URL
 
 const INITIAL_WATER_OPTIONS = [
   { id: 1, label: "500 ml", valueMl: 500, checked: true },

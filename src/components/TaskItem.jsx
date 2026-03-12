@@ -36,9 +36,12 @@ const TaskItem = ({
     try {
       setDeleteTaskIsLoading(true)
 
-      const response = await fetch(`http://localhost:3000/tasks/${task.id}`, {
-        method: "DELETE",
-      })
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/tasks/${task.id}`,
+        {
+          method: "DELETE",
+        }
+      )
 
       if (!response.ok) {
         toast.error("Erro ao deletar a tarefa. Por favor, tente novamente.")

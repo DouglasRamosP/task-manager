@@ -40,7 +40,9 @@ const TaskDetailsPage = () => {
     queryKey: ["task", taskId],
     enabled: !!taskId,
     queryFn: async () => {
-      const { data } = await axios.get(`http://localhost:3000/tasks/${taskId}`)
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_API_URL}/tasks/${taskId}`
+      )
       return data
     },
   })
@@ -59,7 +61,7 @@ const TaskDetailsPage = () => {
     useMutation({
       mutationFn: async (formData) => {
         const { data: updated } = await axios.patch(
-          `http://localhost:3000/tasks/${taskId}`,
+          `${import.meta.env.VITE_API_URL}/tasks/${taskId}`,
           formData
         )
 
@@ -82,7 +84,7 @@ const TaskDetailsPage = () => {
   const { mutateAsync: deleteTaskMutation, isPending: isDeletingTask } =
     useMutation({
       mutationFn: async () => {
-        await axios.delete(`http://localhost:3000/tasks/${taskId}`)
+        await axios.delete(`${import.meta.env.VITE_API_URL}/tasks/${taskId}`)
         return true
       },
       onSuccess: () => {
