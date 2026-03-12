@@ -4,7 +4,6 @@ import { useRef } from "react"
 import { createPortal } from "react-dom"
 import { useForm } from "react-hook-form"
 import { CSSTransition } from "react-transition-group"
-import { toast } from "sonner"
 import { v4 } from "uuid"
 
 import LoaderIcon from "../assets/icons/loader-circle.svg?react"
@@ -12,8 +11,8 @@ import Button from "./Button"
 import Input from "./Input"
 import InputLabel from "./InputLabel"
 
-const AddTaskDialog = ({ isOpen, onClose, onSubmitSuccess }) => {
-  const nodeRef = useRef()
+const AddTaskDialog = ({ isOpen, onClose, onSubmitSuccess, onSubmitError }) => {
+  const nodeRef = useRef(null)
 
   const {
     register,
@@ -48,21 +47,18 @@ const AddTaskDialog = ({ isOpen, onClose, onSubmitSuccess }) => {
         throw new Error(`Erro HTTP: ${response.status}`)
       }
 
-      onSubmitSuccess(task)
-
-      toast.success("Tarefa adicionada com sucesso!")
-
       reset()
-      onClose()
+      onSubmitSuccess?.(task)
+      onClose?.()
     } catch (error) {
       console.error(error)
-      toast.error("Erro ao adicionar a tarefa. Por favor, tente novamente.")
+      onSubmitError?.()
     }
   }
 
   const handleClose = () => {
     reset()
-    onClose()
+    onClose?.()
   }
 
   return (

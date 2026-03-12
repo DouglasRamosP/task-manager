@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import { toast } from "sonner"
 
 import CheckIcon from "../assets/icons/check.svg?react"
 import DetailsIcon from "../assets/icons/details.svg?react"
@@ -35,22 +34,7 @@ const TaskItem = ({
   const handleDeleteClick = async () => {
     try {
       setDeleteTaskIsLoading(true)
-
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/tasks/${task.id}`,
-        {
-          method: "DELETE",
-        }
-      )
-
-      if (!response.ok) {
-        toast.error("Erro ao deletar a tarefa. Por favor, tente novamente.")
-        return
-      }
-
       onDeleteSuccess?.(task.id)
-    } catch {
-      toast.error("Erro ao deletar a tarefa. Por favor, tente novamente.")
     } finally {
       setDeleteTaskIsLoading(false)
     }

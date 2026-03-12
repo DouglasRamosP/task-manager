@@ -1,4 +1,3 @@
-// src/components/Tasks.jsx
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
@@ -17,7 +16,6 @@ const Tasks = () => {
   const queryClient = useQueryClient()
   const [addTaskDialogIsOpen, setAddTaskDialogIsOpen] = useState(false)
 
-  // GET com React Query
   const {
     data: tasks = [],
     isLoading,
@@ -27,12 +25,15 @@ const Tasks = () => {
     queryKey: ["tasks"],
     queryFn: async () => {
       const response = await fetch(`${API_URL}/tasks`, { method: "GET" })
-      if (!response.ok) throw new Error("Erro ao buscar tarefas.")
+
+      if (!response.ok) {
+        throw new Error("Erro ao buscar tarefas.")
+      }
+
       return response.json()
     },
   })
 
-  // separação por período (sempre arrays)
   const { morningTasks, afternoonTasks, eveningTasks } = useMemo(() => {
     return {
       morningTasks: tasks.filter((task) => task.time === "morning"),
@@ -41,25 +42,31 @@ const Tasks = () => {
     }
   }, [tasks])
 
-  // Mutation: deletar tarefa
   const deleteTaskMutation = useMutation({
     mutationFn: async (taskId) => {
       const response = await fetch(`${API_URL}/tasks/${taskId}`, {
         method: "DELETE",
       })
-      if (!response.ok) throw new Error("Erro ao deletar tarefa.")
-      return true
+
+      if (!response.ok) {
+        throw new Error("Erro ao deletar tarefa.")
+      }
+
+      return taskId
     },
-    onSuccess: () => {
-      toast.success("Tarefa deletada com sucesso!")
+    onSuccess: (deletedTaskId) => {
+      queryClient.setQueryData(["tasks"], (oldTasks = []) =>
+        oldTasks.filter((task) => task.id !== deletedTaskId)
+      )
+
       queryClient.invalidateQueries({ queryKey: ["tasks"] })
+      toast.success("Tarefa deletada com sucesso!")
     },
     onError: () => {
       toast.error("Erro ao deletar tarefa. Por favor, tente novamente.")
     },
   })
 
-  // Mutation: alternar status (PATCH)
   const toggleStatusMutation = useMutation({
     mutationFn: async ({ taskId, nextStatus }) => {
       const response = await fetch(`${API_URL}/tasks/${taskId}`, {
@@ -67,10 +74,22 @@ const Tasks = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: nextStatus }),
       })
-      if (!response.ok) throw new Error("Erro ao atualizar status.")
+
+      if (!response.ok) {
+        throw new Error("Erro ao atualizar status.")
+      }
+
       return response.json()
     },
-    onSuccess: (_data, variables) => {
+    onSuccess: (_updatedTask, variables) => {
+      queryClient.setQueryData(["tasks"], (oldTasks = []) =>
+        oldTasks.map((task) =>
+          task.id === variables.taskId
+            ? { ...task, status: variables.nextStatus }
+            : task
+        )
+      )
+
       if (variables.nextStatus === "in_progress") {
         toast.success("Tarefa iniciada com sucesso!")
       } else if (variables.nextStatus === "done") {
@@ -86,7 +105,6 @@ const Tasks = () => {
     },
   })
 
-  // limpar todas (faz DELETE em lote)
   const clearTasksMutation = useMutation({
     mutationFn: async () => {
       await Promise.all(
@@ -94,25 +112,27 @@ const Tasks = () => {
           const response = await fetch(`${API_URL}/tasks/${task.id}`, {
             method: "DELETE",
           })
-          if (!response.ok) throw new Error("Erro ao limpar tarefas.")
+
+          if (!response.ok) {
+            throw new Error("Erro ao limpar tarefas.")
+          }
         })
       )
+
       return true
     },
     onSuccess: () => {
-      toast.success("Tarefas limpas com sucesso!")
+      queryClient.setQueryData(["tasks"], [])
       queryClient.invalidateQueries({ queryKey: ["tasks"] })
+      toast.success("Tarefas limpas com sucesso!")
     },
     onError: () => {
       toast.error("Erro ao limpar tarefas. Por favor, tente novamente.")
     },
   })
 
-  // -----------------
-  // Handlers (UI)
-  // -----------------
-  const handleTaskDeleteClick = (taskId) => {
-    deleteTaskMutation.mutate(taskId)
+  const handleTaskDeleteClick = async (taskId) => {
+    await deleteTaskMutation.mutateAsync(taskId)
   }
 
   const handleDialogClosed = () => {
@@ -124,17 +144,26 @@ const Tasks = () => {
     if (!task) return
 
     let nextStatus = "not_started"
-    if (task.status === "not_started") nextStatus = "in_progress"
-    else if (task.status === "in_progress") nextStatus = "done"
-    else if (task.status === "done") nextStatus = "not_started"
+
+    if (task.status === "not_started") {
+      nextStatus = "in_progress"
+    } else if (task.status === "in_progress") {
+      nextStatus = "done"
+    } else if (task.status === "done") {
+      nextStatus = "not_started"
+    }
 
     toggleStatusMutation.mutate({ taskId, nextStatus })
   }
 
-  // callbacks do Dialog
-  const onTaskSubmitSuccess = () => {
+  const onTaskSubmitSuccess = (newTask) => {
     toast.success("Tarefa adicionada com sucesso!")
     setAddTaskDialogIsOpen(false)
+
+    queryClient.setQueryData(["tasks"], (oldTasks = []) => [
+      ...oldTasks,
+      newTask,
+    ])
     queryClient.invalidateQueries({ queryKey: ["tasks"] })
   }
 
@@ -142,9 +171,6 @@ const Tasks = () => {
     toast.error("Erro ao adicionar tarefa. Por favor, tente novamente.")
   }
 
-  // -----------------
-  // Estados do GET
-  // -----------------
   if (isLoading) {
     return (
       <div className="w-full px-8 py-16">
@@ -173,7 +199,6 @@ const Tasks = () => {
       />
 
       <div className="rounded-xl bg-white p-6">
-        {/* MANHÃ */}
         <div className="my-6 space-y-3">
           <TasksSeparator title="Manhã" icon={<SunIcon />} />
 
@@ -187,14 +212,12 @@ const Tasks = () => {
             <TaskItem
               key={task.id}
               task={task}
-              status={task.status}
               handleCheckboxClick={handleTaskCheckboxClick}
               onDeleteSuccess={handleTaskDeleteClick}
             />
           ))}
         </div>
 
-        {/* TARDE */}
         <div className="my-6 space-y-3">
           <TasksSeparator title="Tarde" icon={<CloudIcon />} />
 
@@ -208,14 +231,12 @@ const Tasks = () => {
             <TaskItem
               key={task.id}
               task={task}
-              status={task.status}
               handleCheckboxClick={handleTaskCheckboxClick}
               onDeleteSuccess={handleTaskDeleteClick}
             />
           ))}
         </div>
 
-        {/* NOITE */}
         <div className="my-6 space-y-3">
           <TasksSeparator title="Noite" icon={<MoonIcon />} />
 
@@ -229,7 +250,6 @@ const Tasks = () => {
             <TaskItem
               key={task.id}
               task={task}
-              status={task.status}
               handleCheckboxClick={handleTaskCheckboxClick}
               onDeleteSuccess={handleTaskDeleteClick}
             />

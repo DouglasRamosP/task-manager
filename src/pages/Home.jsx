@@ -143,9 +143,14 @@ const HomePage = () => {
     setAddTaskDialogIsOpen(false)
   }
 
-  const onTaskSubmitSuccess = () => {
+  const onTaskSubmitSuccess = (newTask) => {
     toast.success("Tarefa adicionada com sucesso!")
     setAddTaskDialogIsOpen(false)
+
+    queryClient.setQueryData(["tasks"], (oldTasks = []) => [
+      ...oldTasks,
+      newTask,
+    ])
     queryClient.invalidateQueries({ queryKey: ["tasks"] })
   }
 
