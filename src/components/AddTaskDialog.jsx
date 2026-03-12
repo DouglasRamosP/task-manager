@@ -29,30 +29,35 @@ const AddTaskDialog = ({ isOpen, onClose, onSubmitSuccess }) => {
   })
 
   const handleSaveClick = async (data) => {
-    const task = {
-      id: v4(),
-      title: data.title.trim(),
-      time: data.time,
-      description: data.description.trim(),
-      status: "not_started",
-    }
+    try {
+      const task = {
+        id: v4(),
+        title: data.title.trim(),
+        time: data.time,
+        description: data.description.trim(),
+        status: "not_started",
+      }
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(task),
-    })
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(task),
+      })
 
-    if (!response.ok) {
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status}`)
+      }
+
+      onSubmitSuccess(task)
+
+      toast.success("Tarefa adicionada com sucesso!")
+
+      reset()
+      onClose()
+    } catch (error) {
+      console.error(error)
       toast.error("Erro ao adicionar a tarefa. Por favor, tente novamente.")
-      return
     }
-
-    onSubmitSuccess(task)
-    toast.success("Tarefa adicionada com sucesso!")
-
-    reset() // limpa o form
-    onClose()
   }
 
   const handleClose = () => {
