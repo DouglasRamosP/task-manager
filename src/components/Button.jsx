@@ -10,7 +10,7 @@ const Button = ({
   ...rest
 }) => {
   const button = tv({
-    base: "flex items-center justify-center gap-2 rounded-md font-semibold transition hover:opacity-75",
+    base: "flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-semibold transition hover:opacity-75",
     variants: {
       color: {
         primary: "bg-brand-primary text-white",
@@ -23,7 +23,7 @@ const Button = ({
         large: "px-3 py-2 text-sm",
       },
       disabled: {
-        true: "opacity-50 cursor-not-allowed hover:opacity-50",
+        true: "cursor-not-allowed opacity-50 hover:opacity-50",
       },
     },
     defaultVariants: {

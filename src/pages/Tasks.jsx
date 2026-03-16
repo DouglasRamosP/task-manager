@@ -3,12 +3,12 @@ import Tasks from "../components/Tasks"
 
 const TasksPage = () => {
   return (
-    <div className="flex min-h-screen bg-brand-background">
-      <div className="w-72 shrink-0">
+    <div className="flex min-h-screen flex-col bg-brand-background lg:flex-row">
+      <div className="shrink-0 lg:w-72">
         <Sidebar />
       </div>
 
-      <main className="flex-1">
+      <main className="w-full flex-1">
         <Tasks />
       </main>
     </div>

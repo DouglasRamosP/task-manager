@@ -200,14 +200,14 @@ const HomePage = () => {
   )
 
   return (
-    <div className="flex min-h-screen bg-brand-background">
+    <div className="flex min-h-screen flex-col bg-brand-background lg:flex-row">
       <Toaster />
 
-      <div className="w-72 shrink-0">
+      <div className="shrink-0 lg:w-72">
         <Sidebar />
       </div>
 
-      <main className="flex-1 space-y-6 px-8 py-16">
+      <main className="w-full flex-1 space-y-6 px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
         <Header
           subtitle="Dashboard"
           title="Início"
@@ -255,7 +255,7 @@ const HomePage = () => {
               />
             </div>
 
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-[2fr_1fr]">
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
               <TaskSummaryCard
                 tasks={sortedTasks}
                 handleCheckboxClick={handleTaskCheckboxClick}

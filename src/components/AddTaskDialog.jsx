@@ -73,9 +73,9 @@ const AddTaskDialog = ({ isOpen, onClose, onSubmitSuccess, onSubmitError }) => {
         {createPortal(
           <div
             ref={nodeRef}
-            className="fixed bottom-0 left-0 right-0 top-0 flex h-screen w-screen items-center justify-center backdrop-blur-sm"
+            className="fixed bottom-0 left-0 right-0 top-0 z-50 flex h-screen w-screen items-center justify-center p-4 backdrop-blur-sm"
           >
-            <div className="rounded-xl bg-white p-5 text-center shadow">
+            <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-5 text-center shadow sm:p-6">
               <h2 className="text-xl font-semibold text-brand-dark-blue">
                 Nova Tarefa
               </h2>
@@ -84,7 +84,7 @@ const AddTaskDialog = ({ isOpen, onClose, onSubmitSuccess, onSubmitError }) => {
               </p>
 
               <form onSubmit={handleSubmit(handleSaveClick)}>
-                <div className="flex w-[336px] flex-col space-y-4">
+                <div className="flex w-full flex-col space-y-4">
                   <Input
                     id="title"
                     label="Título"
@@ -131,7 +131,7 @@ const AddTaskDialog = ({ isOpen, onClose, onSubmitSuccess, onSubmitError }) => {
                     error={errors.description}
                   />
 
-                  <div className="flex gap-3">
+                  <div className="flex flex-col gap-3 sm:flex-row">
                     <Button
                       type="button"
                       onClick={handleClose}

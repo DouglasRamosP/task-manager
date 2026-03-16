@@ -173,7 +173,7 @@ const Tasks = () => {
 
   if (isLoading) {
     return (
-      <div className="w-full px-8 py-16">
+      <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
         <p className="text-sm text-brand-text-gray">Carregando tarefas...</p>
       </div>
     )
@@ -181,7 +181,7 @@ const Tasks = () => {
 
   if (isError) {
     return (
-      <div className="w-full px-8 py-16">
+      <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
         <p className="text-sm text-red-600">
           Erro ao carregar tarefas: {error?.message || "desconhecido"}
         </p>
@@ -190,7 +190,7 @@ const Tasks = () => {
   }
 
   return (
-    <div className="w-full px-8 py-16">
+    <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
       <Header
         subtitle="Minhas Tarefas"
         title="Minhas Tarefas"
@@ -198,7 +198,7 @@ const Tasks = () => {
         onOpenDialog={() => setAddTaskDialogIsOpen(true)}
       />
 
-      <div className="rounded-xl bg-white p-6">
+      <div className="rounded-xl bg-white p-4 shadow-sm sm:p-6">
         <div className="my-6 space-y-3">
           <TasksSeparator title="Manhã" icon={<SunIcon />} />
 

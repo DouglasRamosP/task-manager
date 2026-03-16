@@ -11,7 +11,7 @@ const formatWaterLabel = (valueMl) => {
 
 const WaterGoalCard = ({ options, selectedMl, goalMl, onToggleOption }) => {
   return (
-    <div className="flex h-full min-h-[360px] flex-col rounded-xl bg-white p-6 shadow-sm">
+    <div className="flex h-full min-h-[360px] flex-col rounded-xl bg-white p-5 shadow-sm sm:p-6">
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-brand-dark-blue">Água</h3>
         <p className="text-sm text-brand-text-gray">
@@ -47,7 +47,7 @@ const WaterGoalCard = ({ options, selectedMl, goalMl, onToggleOption }) => {
           ))}
         </div>
 
-        <div className="mt-6 flex items-end justify-between gap-4">
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="h-2 w-full rounded-full bg-[#f0f0f0]">
             <div
               className="h-2 rounded-full bg-brand-primary transition-all"
@@ -57,7 +57,7 @@ const WaterGoalCard = ({ options, selectedMl, goalMl, onToggleOption }) => {
             />
           </div>
 
-          <div className="shrink-0 text-right">
+          <div className="shrink-0 text-left sm:text-right">
             <span className="text-sm font-semibold text-brand-primary">
               {formatWaterLabel(selectedMl)}
             </span>

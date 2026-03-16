@@ -42,9 +42,9 @@ const TaskItem = ({
 
   return (
     <div
-      className={`flex items-center justify-between gap-2 rounded-lg bg-opacity-10 px-4 py-3 text-sm transition ${getStatusClasses()}`}
+      className={`flex flex-col gap-3 rounded-lg bg-opacity-10 px-4 py-3 text-sm transition sm:flex-row sm:items-center sm:justify-between ${getStatusClasses()}`}
     >
-      <div className="flex min-w-0 items-center gap-2">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
         <label
           className={`relative flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-lg ${getStatusClasses()}`}
         >
@@ -61,10 +61,10 @@ const TaskItem = ({
           )}
         </label>
 
-        <span className="truncate">{task.title}</span>
+        <span className="break-words">{task.title}</span>
       </div>
 
-      <div className="flex shrink-0 gap-2">
+      <div className="flex w-full shrink-0 justify-end gap-2 sm:w-auto">
         {showDeleteButton && (
           <Button
             color="ghost"
@@ -80,7 +80,10 @@ const TaskItem = ({
           />
         )}
 
-        <Link to={`/tasks/${task.id}`}>
+        <Link
+          to={`/tasks/${task.id}`}
+          className="flex h-8 w-8 items-center justify-center rounded-md transition hover:bg-black/5"
+        >
           <DetailsIcon />
         </Link>
       </div>

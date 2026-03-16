@@ -4,20 +4,21 @@ import Button from "./Button"
 
 const Header = ({ subtitle, title, onClearTasks, onOpenDialog }) => {
   return (
-    <div className="flex justify-between pb-6">
+    <div className="flex flex-col gap-4 pb-6 sm:flex-row sm:items-start sm:justify-between">
       <div>
         <span className="text-xs font-semibold text-brand-primary">
           {subtitle}
         </span>
-        <h2 className="text-xl font-semibold">{title}</h2>
+        <h2 className="text-xl font-semibold sm:text-2xl">{title}</h2>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
         <Button
           color="ghost"
           text="Limpar tarefas"
           icon={<TrashIcon />}
           onClick={onClearTasks}
+          className="w-full justify-center sm:w-auto"
         />
 
         <Button
@@ -25,6 +26,7 @@ const Header = ({ subtitle, title, onClearTasks, onOpenDialog }) => {
           text="Nova tarefa"
           icon={<AddIcon />}
           onClick={onOpenDialog}
+          className="w-full justify-center sm:w-auto"
         />
       </div>
     </div>

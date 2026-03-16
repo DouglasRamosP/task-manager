@@ -106,9 +106,11 @@ const TaskDetailsPage = () => {
 
   if (isLoadingTask) {
     return (
-      <div className="flex min-h-screen">
-        <Sidebar />
-        <div className="w-full px-8 py-16">
+      <div className="flex min-h-screen flex-col bg-brand-background lg:flex-row">
+        <div className="shrink-0 lg:w-72">
+          <Sidebar />
+        </div>
+        <div className="w-full px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
           <div className="flex items-center gap-2 text-brand-text-gray">
             <LoaderIcon className="h-5 w-5 animate-spin" />
             <span>Carregando tarefa...</span>
@@ -120,9 +122,11 @@ const TaskDetailsPage = () => {
 
   if (isError) {
     return (
-      <div className="flex min-h-screen">
-        <Sidebar />
-        <div className="w-full px-8 py-16">
+      <div className="flex min-h-screen flex-col bg-brand-background lg:flex-row">
+        <div className="shrink-0 lg:w-72">
+          <Sidebar />
+        </div>
+        <div className="w-full px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
           <p className="text-red-600">
             {String(error?.message ?? "Erro ao carregar a tarefa.")}
           </p>
@@ -140,11 +144,13 @@ const TaskDetailsPage = () => {
   }
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
+    <div className="flex min-h-screen flex-col bg-brand-background lg:flex-row">
+      <div className="shrink-0 lg:w-72">
+        <Sidebar />
+      </div>
 
-      <div className="w-full px-8 py-16">
-        <div className="flex w-full justify-between">
+      <div className="w-full px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
+        <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <button
               className="mb-3 flex h-8 w-8 items-center rounded-full bg-brand-primary"
@@ -153,7 +159,7 @@ const TaskDetailsPage = () => {
               <ArrowLeftIcon />
             </button>
 
-            <div className="flex items-baseline gap-1 text-xs">
+            <div className="flex flex-wrap items-baseline gap-1 text-xs">
               <span
                 onClick={handleBackClick}
                 className="cursor-pointer text-brand-text-gray"
@@ -168,11 +174,13 @@ const TaskDetailsPage = () => {
               </span>
             </div>
 
-            <h1 className="mt-2 text-xl font-semibold">{task?.title}</h1>
+            <h1 className="mt-2 break-words text-xl font-semibold sm:text-2xl">
+              {task?.title}
+            </h1>
           </div>
 
           <Button
-            className="h-fit self-end"
+            className="h-fit w-full justify-center self-start sm:w-auto sm:self-end"
             color="delete"
             size="small"
             text="Deletar tarefa"
@@ -189,7 +197,7 @@ const TaskDetailsPage = () => {
         </div>
 
         <form onSubmit={handleSubmit(handleSaveClick)}>
-          <div className="mt-6 space-y-6 rounded-xl bg-brand-white p-6">
+          <div className="mt-6 space-y-6 rounded-xl bg-brand-white p-5 shadow-sm sm:p-6">
             <div>
               <Input
                 id="title"
@@ -236,7 +244,7 @@ const TaskDetailsPage = () => {
             </div>
           </div>
 
-          <div className="flex w-full justify-end gap-3 pt-4">
+          <div className="flex w-full flex-col gap-3 pt-4 sm:flex-row sm:justify-end">
             <Button
               type="button"
               color="secondary"
@@ -244,6 +252,7 @@ const TaskDetailsPage = () => {
               text="Cancelar"
               onClick={handleBackClick}
               disabled={isBusy}
+              className="w-full justify-center sm:w-auto"
             />
 
             <Button
@@ -252,6 +261,7 @@ const TaskDetailsPage = () => {
               size="large"
               text="Salvar"
               disabled={isBusy}
+              className="w-full justify-center sm:w-auto"
               icon={
                 isUpdatingTask ? <LoaderIcon className="animate-spin" /> : null
               }
