@@ -1,5 +1,9 @@
-const ImputErrorMessage = ({ children }) => {
-  return <p className="text-left text-xs text-red-500">{children}</p>
+const InputErrorMessage = ({ children }) => {
+  return (
+    <p className="text-left text-xs font-medium text-brand-danger">
+      {children}
+    </p>
+  )
 }
 
-export default ImputErrorMessage
+export default InputErrorMessage

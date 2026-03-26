@@ -1,45 +1,51 @@
-import { tv } from "tailwind-variants"
-
 const Button = ({
   icon,
   text,
   color = "primary",
   size = "small",
+  type = "button",
   onClick,
   className,
+  disabled = false,
   ...rest
 }) => {
-  const button = tv({
-    base: "flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-semibold transition hover:opacity-75",
-    variants: {
-      color: {
-        primary: "bg-brand-primary text-white",
-        ghost: "bg-transparent text-brand-dark-gray",
-        secondary: "bg-brand-light-gray text-brand-dark-blue",
-        delete: "bg-brand-danger text-brand-white",
-      },
-      size: {
-        small: "px-3 py-1 text-xs",
-        large: "px-3 py-2 text-sm",
-      },
-      disabled: {
-        true: "cursor-not-allowed opacity-50 hover:opacity-50",
-      },
-    },
-    defaultVariants: {
-      color: "primary",
-      size: "small",
-    },
-  })
+  const colorClasses = {
+    primary:
+      "bg-brand-primary text-white shadow-lg shadow-brand-primary/20 hover:-translate-y-0.5 hover:bg-brand-primary/90",
+    ghost:
+      "border border-brand-line bg-white/80 text-brand-ink hover:-translate-y-0.5 hover:border-brand-primary/30 hover:bg-white",
+    secondary:
+      "border border-brand-line bg-brand-background/80 text-brand-ink hover:-translate-y-0.5 hover:border-brand-primary/20",
+    delete:
+      "bg-brand-danger text-white shadow-lg shadow-brand-danger/15 hover:-translate-y-0.5 hover:bg-brand-danger/90",
+  }
+
+  const sizeClasses = {
+    small: "min-h-10 rounded-2xl px-4 text-sm",
+    large: "min-h-12 rounded-2xl px-5 text-sm",
+  }
+
+  const classes = [
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold transition duration-200 focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:ring-offset-2 focus:ring-offset-transparent",
+    colorClasses[color],
+    sizeClasses[size],
+    disabled &&
+      "cursor-not-allowed opacity-60 hover:translate-y-0 hover:opacity-60",
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ")
 
   return (
     <button
-      className={button({ color, size, disabled: rest.disabled, className })}
+      className={classes}
       onClick={onClick}
+      type={type}
+      disabled={disabled}
       {...rest}
     >
-      {text}
-      {icon}
+      {icon ? <span className="shrink-0">{icon}</span> : null}
+      {text ? <span>{text}</span> : null}
     </button>
   )
 }

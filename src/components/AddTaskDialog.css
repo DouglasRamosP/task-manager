@@ -1,17 +1,25 @@
 .add-task-dialog-enter {
   opacity: 0;
+  transform: translateY(20px) scale(0.98);
 }
 
 .add-task-dialog-enter-active {
   opacity: 1;
-  transition: opacity 500ms;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity 280ms ease,
+    transform 280ms ease;
 }
 
 .add-task-dialog-exit {
   opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
 .add-task-dialog-exit-active {
   opacity: 0;
-  transition: opacity 500ms;
+  transform: translateY(12px) scale(0.98);
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease;
 }

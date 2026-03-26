@@ -1,22 +1,16 @@
 import { NavLink } from "react-router-dom"
-import { tv } from "tailwind-variants"
 
 const SidebarButton = ({ children, to }) => {
-  const sidebar = tv({
-    base: "flex min-w-fit items-center gap-2 whitespace-nowrap rounded-lg px-4 py-3 lg:px-6",
-    variants: {
-      color: {
-        unselected: "text-brand-dark-blue",
-        selected: "bg-[#E6F7F8] text-brand-primary",
-      },
-    },
-  })
-
   return (
     <NavLink
       to={to}
       className={({ isActive }) =>
-        sidebar({ color: isActive ? "selected" : "unselected" })
+        [
+          "flex min-w-fit shrink-0 items-center justify-center gap-2.5 whitespace-nowrap rounded-[1.1rem] border px-4 py-3 text-sm font-medium transition duration-200 [&_svg]:shrink-0",
+          isActive
+            ? "border-brand-primary/30 bg-brand-primary/15 text-white shadow-lg shadow-black/20"
+            : "border-transparent bg-transparent text-white/75 hover:border-white/10 hover:bg-white/10 hover:text-white",
+        ].join(" ")
       }
     >
       {children}

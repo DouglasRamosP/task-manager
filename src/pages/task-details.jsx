@@ -1,18 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import axios from "axios"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
 
 import ArrowLeftIcon from "../assets/icons/arrow-left.svg?react"
-import ChevronRightIcon from "../assets/icons/chevron-right.svg?react"
 import LoaderIcon from "../assets/icons/loader-circle.svg?react"
 import TrashIcon from "../assets/icons/trash.svg?react"
 import Button from "../components/Button"
-import Input from "../components/Input"
+import EmptyState from "../components/EmptyState"
+import Input, { fieldClassName } from "../components/Input"
 import InputLabel from "../components/InputLabel"
-import Sidebar from "../components/Sidebar"
+import {
+  deleteTask,
+  getTask,
+  TASK_STATUS_META,
+  TASK_TIME_PERIODS,
+  updateTask,
+} from "../lib/tasks"
 
 const TaskDetailsPage = () => {
   const queryClient = useQueryClient()
@@ -38,37 +43,33 @@ const TaskDetailsPage = () => {
     error,
   } = useQuery({
     queryKey: ["task", taskId],
-    enabled: !!taskId,
-    queryFn: async () => {
-      const { data } = await axios.get(
-        `${import.meta.env.VITE_API_URL}/tasks/${taskId}`
-      )
-      return data
-    },
+    enabled: Boolean(taskId),
+    queryFn: () => getTask(taskId),
   })
 
   useEffect(() => {
-    if (!task) return
+    if (!task) {
+      return
+    }
 
     reset({
       title: task.title ?? "",
       time: task.time ?? "morning",
+      status: task.status ?? "not_started",
       description: task.description ?? "",
     })
-  }, [task, reset])
+  }, [reset, task])
 
   const { mutateAsync: updateTaskMutation, isPending: isUpdatingTask } =
     useMutation({
-      mutationFn: async (formData) => {
-        const { data: updated } = await axios.patch(
-          `${import.meta.env.VITE_API_URL}/tasks/${taskId}`,
-          formData
+      mutationFn: (formData) => updateTask(taskId, formData),
+      onSuccess: (updatedTask) => {
+        queryClient.setQueryData(["task", taskId], updatedTask)
+        queryClient.setQueryData(["tasks"], (oldTasks = []) =>
+          oldTasks.map((currentTask) =>
+            currentTask.id === taskId ? updatedTask : currentTask
+          )
         )
-
-        return updated
-      },
-      onSuccess: (updated) => {
-        queryClient.setQueryData(["task", taskId], updated)
         queryClient.invalidateQueries({ queryKey: ["tasks"] })
         toast.success("Tarefa atualizada com sucesso!")
       },
@@ -83,15 +84,15 @@ const TaskDetailsPage = () => {
 
   const { mutateAsync: deleteTaskMutation, isPending: isDeletingTask } =
     useMutation({
-      mutationFn: async () => {
-        await axios.delete(`${import.meta.env.VITE_API_URL}/tasks/${taskId}`)
-        return true
-      },
+      mutationFn: () => deleteTask(taskId),
       onSuccess: () => {
         queryClient.removeQueries({ queryKey: ["task", taskId] })
+        queryClient.setQueryData(["tasks"], (oldTasks = []) =>
+          oldTasks.filter((currentTask) => currentTask.id !== taskId)
+        )
         queryClient.invalidateQueries({ queryKey: ["tasks"] })
         toast.success("Tarefa deletada com sucesso!")
-        navigate(-1)
+        navigate("/tasks")
       },
       onError: () => {
         toast.error("Erro ao deletar tarefa. Por favor, tente novamente.")
@@ -99,35 +100,41 @@ const TaskDetailsPage = () => {
     })
 
   const handleTaskDeleteClick = async () => {
+    if (
+      !window.confirm(`Deseja realmente excluir a tarefa "${task?.title}"?`)
+    ) {
+      return
+    }
+
     await deleteTaskMutation()
   }
 
   const isBusy = isUpdatingTask || isDeletingTask || isSubmittingForm
 
+  const statusBadgeClassName = {
+    not_started: "bg-brand-background text-brand-muted",
+    in_progress: "bg-brand-warning/15 text-brand-warning",
+    done: "bg-brand-success/15 text-brand-success",
+  }
+
   if (isLoadingTask) {
     return (
-      <div className="flex min-h-screen flex-col bg-brand-background lg:flex-row">
-        <div className="shrink-0 lg:w-72">
-          <Sidebar />
-        </div>
-        <div className="w-full px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
-          <div className="flex items-center gap-2 text-brand-text-gray">
+      <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
+        <section className="rounded-[2rem] border border-white/70 bg-white/85 p-8 shadow-card backdrop-blur">
+          <div className="flex items-center gap-2 text-brand-muted">
             <LoaderIcon className="h-5 w-5 animate-spin" />
             <span>Carregando tarefa...</span>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
     )
   }
 
   if (isError) {
     return (
-      <div className="flex min-h-screen flex-col bg-brand-background lg:flex-row">
-        <div className="shrink-0 lg:w-72">
-          <Sidebar />
-        </div>
-        <div className="w-full px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
-          <p className="text-red-600">
+      <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
+        <section className="rounded-[2rem] border border-brand-danger/20 bg-white/85 p-8 shadow-card backdrop-blur">
+          <p className="text-brand-danger">
             {String(error?.message ?? "Erro ao carregar a tarefa.")}
           </p>
           <div className="mt-4">
@@ -138,49 +145,71 @@ const TaskDetailsPage = () => {
               onClick={handleBackClick}
             />
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
+    )
+  }
+
+  if (!task) {
+    return (
+      <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
+        <EmptyState
+          title="Tarefa nao encontrada"
+          description="Nao foi possivel localizar este item. Ele pode ter sido removido ou ainda nao estar disponivel."
+          action={
+            <Button
+              color="secondary"
+              size="large"
+              text="Voltar para tarefas"
+              onClick={() => navigate("/tasks")}
+            />
+          }
+        />
+      </main>
     )
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-brand-background lg:flex-row">
-      <div className="shrink-0 lg:w-72">
-        <Sidebar />
-      </div>
-
-      <div className="w-full px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
-        <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <main className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
+      <section className="rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-soft backdrop-blur sm:p-8">
+        <div className="flex w-full flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <button
-              className="mb-3 flex h-8 w-8 items-center rounded-full bg-brand-primary"
+              className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl border border-brand-line bg-white text-brand-ink transition hover:border-brand-primary/20 hover:text-brand-primary"
               onClick={handleBackClick}
             >
-              <ArrowLeftIcon />
+              <ArrowLeftIcon className="h-4 w-4" />
             </button>
 
-            <div className="flex flex-wrap items-baseline gap-1 text-xs">
+            <div className="flex flex-wrap items-center gap-2">
               <span
-                onClick={handleBackClick}
-                className="cursor-pointer text-brand-text-gray"
+                className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
+                  statusBadgeClassName[task.status] ??
+                  statusBadgeClassName.not_started
+                }`}
               >
-                Minhas tarefas
+                {TASK_STATUS_META[task.status]?.label ?? "Status"}
               </span>
 
-              <ChevronRightIcon className="translate-y-[1px] text-brand-text-gray" />
-
-              <span className="font-semibold text-brand-primary">
-                {task?.title}
+              <span className="rounded-full bg-brand-background px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-muted">
+                {
+                  TASK_TIME_PERIODS.find((period) => period.value === task.time)
+                    ?.label
+                }
               </span>
             </div>
 
-            <h1 className="mt-2 break-words text-xl font-semibold sm:text-2xl">
-              {task?.title}
+            <h1 className="mt-4 break-words text-3xl font-semibold tracking-[-0.05em] text-brand-ink sm:text-4xl">
+              {task.title}
             </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-brand-muted sm:text-base">
+              Edite os detalhes da tarefa, ajuste o periodo do dia e mantenha o
+              status alinhado com o andamento real.
+            </p>
           </div>
 
           <Button
-            className="h-fit w-full justify-center self-start sm:w-auto sm:self-end"
+            className="h-fit w-full justify-center self-start lg:w-auto"
             color="delete"
             size="small"
             text="Deletar tarefa"
@@ -195,56 +224,81 @@ const TaskDetailsPage = () => {
             disabled={isBusy}
           />
         </div>
+      </section>
 
-        <form onSubmit={handleSubmit(handleSaveClick)}>
-          <div className="mt-6 space-y-6 rounded-xl bg-brand-white p-5 shadow-sm sm:p-6">
+      <form
+        onSubmit={handleSubmit(handleSaveClick)}
+        className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]"
+      >
+        <section className="space-y-6 rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-card backdrop-blur sm:p-8">
+          <div className="grid gap-6 sm:grid-cols-2">
             <div>
               <Input
                 id="title"
-                label="Título"
+                label="Titulo"
                 {...register("title", {
-                  required: "O Título é obrigatório.",
+                  required: "O titulo e obrigatorio.",
                   validate: (value) => {
-                    if (!value.trim()) return "O título não pode ser vazio."
+                    if (!value.trim()) return "O titulo nao pode ser vazio."
                     return true
                   },
                 })}
-                error={errors?.title}
+                error={errors.title}
               />
             </div>
 
-            <div className="flex flex-col">
-              <InputLabel htmlFor="horario">Horário</InputLabel>
+            <div className="flex flex-col gap-1.5">
+              <InputLabel htmlFor="time">Periodo do dia</InputLabel>
               <select
-                className="rounded-lg border border-solid border-[#ECECEC] px-4 py-3 outline-brand-primary placeholder:text-sm placeholder:text-brand-text-gray"
-                id="horario"
+                className={fieldClassName}
+                id="time"
                 {...register("time", {
-                  required: "O Período é obrigatório.",
+                  required: "O periodo e obrigatorio.",
                 })}
               >
-                <option value="morning">Manhã</option>
-                <option value="afternoon">Tarde</option>
-                <option value="evening">Noite</option>
+                {TASK_TIME_PERIODS.map((period) => (
+                  <option key={period.value} value={period.value}>
+                    {period.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <InputLabel htmlFor="status">Status</InputLabel>
+              <select
+                className={fieldClassName}
+                id="status"
+                {...register("status", {
+                  required: "O status e obrigatorio.",
+                })}
+              >
+                {Object.entries(TASK_STATUS_META).map(([value, meta]) => (
+                  <option key={value} value={value}>
+                    {meta.label}
+                  </option>
+                ))}
               </select>
             </div>
 
             <div>
               <Input
+                as="textarea"
                 id="description"
-                label="Descrição"
+                label="Descricao"
                 {...register("description", {
-                  required: "A descrição é obrigatória.",
+                  required: "A descricao e obrigatoria.",
                   validate: (value) => {
-                    if (!value.trim()) return "A descrição não pode ser vazia."
+                    if (!value.trim()) return "A descricao nao pode ser vazia."
                     return true
                   },
                 })}
-                error={errors?.description}
+                error={errors.description}
               />
             </div>
           </div>
 
-          <div className="flex w-full flex-col gap-3 pt-4 sm:flex-row sm:justify-end">
+          <div className="flex w-full flex-col gap-3 border-t border-brand-line pt-5 sm:flex-row sm:justify-end">
             <Button
               type="button"
               color="secondary"
@@ -263,13 +317,68 @@ const TaskDetailsPage = () => {
               disabled={isBusy}
               className="w-full justify-center sm:w-auto"
               icon={
-                isUpdatingTask ? <LoaderIcon className="animate-spin" /> : null
+                isUpdatingTask ? (
+                  <LoaderIcon className="h-4 w-4 animate-spin" />
+                ) : null
               }
             />
           </div>
-        </form>
-      </div>
-    </div>
+        </section>
+
+        <aside className="space-y-6 rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-card backdrop-blur">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-primary">
+              Resumo rapido
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-brand-ink">
+              Contexto da tarefa
+            </h2>
+          </div>
+
+          <div className="space-y-4">
+            <div className="rounded-2xl bg-brand-background p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-muted">
+                Status atual
+              </p>
+              <p className="mt-2 text-base font-semibold text-brand-ink">
+                {TASK_STATUS_META[task.status]?.label}
+              </p>
+              <p className="mt-1 text-sm leading-6 text-brand-muted">
+                {TASK_STATUS_META[task.status]?.description}
+              </p>
+            </div>
+
+            <div className="rounded-2xl bg-brand-background p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-muted">
+                Periodo
+              </p>
+              <p className="mt-2 text-base font-semibold text-brand-ink">
+                {
+                  TASK_TIME_PERIODS.find((period) => period.value === task.time)
+                    ?.label
+                }
+              </p>
+              <p className="mt-1 text-sm leading-6 text-brand-muted">
+                {
+                  TASK_TIME_PERIODS.find((period) => period.value === task.time)
+                    ?.description
+                }
+              </p>
+            </div>
+
+            <div className="rounded-2xl bg-brand-background p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-muted">
+                Dica de uso
+              </p>
+              <p className="mt-2 text-sm leading-7 text-brand-muted">
+                Use a descricao para registrar contexto suficiente para retomar
+                a tarefa rapidamente sem depender da memoria.
+              </p>
+            </div>
+          </div>
+        </aside>
+      </form>
+    </main>
   )
 }
 

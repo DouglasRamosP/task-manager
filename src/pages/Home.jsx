@@ -1,26 +1,39 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useMemo, useState } from "react"
-import { toast, Toaster } from "sonner"
+import { useEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
 
 import WaterIcon from "../assets/icons/glass-water.svg?react"
 import TaskIcon from "../assets/icons/layout-list.svg?react"
 import TaskCheckIcon from "../assets/icons/list-checks.svg?react"
 import LoaderIcon from "../assets/icons/loader-circle2.svg?react"
 import AddTaskDialog from "../components/AddTaskDialog"
+import EmptyState from "../components/EmptyState"
 import Header from "../components/Header"
-import Sidebar from "../components/Sidebar"
 import TaskSummaryCard from "../components/TaskSummaryCard"
 import WaterGoalCard from "../components/WaterGoalCard"
+import {
+  clearTasks,
+  getNextTaskStatus,
+  getTasks,
+  getTaskStats,
+  sortTasks,
+  updateTaskStatus,
+} from "../lib/tasks"
+import {
+  clearStoredWaterSelection,
+  createWaterOptions,
+  getStoredWaterSelection,
+  persistWaterSelection,
+} from "../lib/water"
 import Dashboard from "./Dashboard"
 
-const API_URL = import.meta.env.VITE_API_URL
-
 const INITIAL_WATER_OPTIONS = [
-  { id: 1, label: "500 ml", valueMl: 500, checked: true },
-  { id: 2, label: "1 litro", valueMl: 1000, checked: true },
-  { id: 3, label: "1.5 litros", valueMl: 1500, checked: false },
-  { id: 4, label: "2 litros", valueMl: 2000, checked: false },
-  { id: 5, label: "2.5 litros", valueMl: 2500, checked: false },
+  { id: 1, label: "250 ml", valueMl: 250 },
+  { id: 2, label: "500 ml", valueMl: 500 },
+  { id: 3, label: "1 litro", valueMl: 1000 },
+  { id: 4, label: "1.5 litros", valueMl: 1500 },
+  { id: 5, label: "2 litros", valueMl: 2000 },
+  { id: 6, label: "2.5 litros", valueMl: 2500 },
 ]
 
 const WATER_GOAL_ML = 2500
@@ -29,7 +42,9 @@ const HomePage = () => {
   const queryClient = useQueryClient()
 
   const [addTaskDialogIsOpen, setAddTaskDialogIsOpen] = useState(false)
-  const [waterOptions, setWaterOptions] = useState(INITIAL_WATER_OPTIONS)
+  const [waterOptions, setWaterOptions] = useState(() =>
+    createWaterOptions(INITIAL_WATER_OPTIONS, getStoredWaterSelection())
+  )
 
   const {
     data: tasks = [],
@@ -38,36 +53,25 @@ const HomePage = () => {
     error,
   } = useQuery({
     queryKey: ["tasks"],
-    queryFn: async () => {
-      const response = await fetch(`${API_URL}/tasks`)
-
-      if (!response.ok) {
-        throw new Error("Erro ao buscar tarefas.")
-      }
-
-      return response.json()
-    },
+    queryFn: getTasks,
   })
 
   const toggleStatusMutation = useMutation({
-    mutationFn: async ({ taskId, nextStatus }) => {
-      const response = await fetch(`${API_URL}/tasks/${taskId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: nextStatus }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Erro ao atualizar status.")
-      }
-
-      return response.json()
-    },
+    mutationFn: ({ nextStatus, taskId }) =>
+      updateTaskStatus(taskId, nextStatus),
     onSuccess: (_data, variables) => {
+      queryClient.setQueryData(["tasks"], (oldTasks = []) =>
+        oldTasks.map((task) =>
+          task.id === variables.taskId
+            ? { ...task, status: variables.nextStatus }
+            : task
+        )
+      )
+
       if (variables.nextStatus === "in_progress") {
         toast.success("Tarefa iniciada com sucesso!")
       } else if (variables.nextStatus === "done") {
-        toast.success("Tarefa concluída com sucesso!")
+        toast.success("Tarefa concluida com sucesso!")
       } else {
         toast.success("Tarefa reiniciada com sucesso!")
       }
@@ -80,63 +84,85 @@ const HomePage = () => {
   })
 
   const clearTasksMutation = useMutation({
-    mutationFn: async () => {
-      await Promise.all(
-        tasks.map(async (task) => {
-          const response = await fetch(`${API_URL}/tasks/${task.id}`, {
-            method: "DELETE",
-          })
-
-          if (!response.ok) {
-            throw new Error("Erro ao limpar tarefas.")
-          }
-        })
-      )
-
-      return true
-    },
+    mutationFn: () => clearTasks(tasks),
     onSuccess: () => {
-      toast.success("Tarefas limpas com sucesso!")
+      queryClient.setQueryData(["tasks"], [])
       queryClient.invalidateQueries({ queryKey: ["tasks"] })
+      toast.success("Tarefas limpas com sucesso!")
     },
     onError: () => {
       toast.error("Erro ao limpar tarefas. Por favor, tente novamente.")
     },
   })
 
+  useEffect(() => {
+    const selectedMl = Math.max(
+      0,
+      ...waterOptions
+        .filter((option) => option.checked)
+        .map((option) => option.valueMl)
+    )
+
+    persistWaterSelection(selectedMl)
+  }, [waterOptions])
+
   const handleTaskCheckboxClick = (taskId) => {
-    const task = tasks.find((t) => t.id === taskId)
-    if (!task) return
+    const task = tasks.find((currentTask) => currentTask.id === taskId)
 
-    let nextStatus = "not_started"
+    if (!task) {
+      return
+    }
 
-    if (task.status === "not_started") nextStatus = "in_progress"
-    else if (task.status === "in_progress") nextStatus = "done"
-    else if (task.status === "done") nextStatus = "not_started"
-
-    toggleStatusMutation.mutate({ taskId, nextStatus })
+    toggleStatusMutation.mutate({
+      taskId,
+      nextStatus: getNextTaskStatus(task.status),
+    })
   }
 
   const handleWaterOptionToggle = (optionId) => {
-    setWaterOptions((prevOptions) => {
-      const clickedOption = prevOptions.find((option) => option.id === optionId)
-      if (!clickedOption) return prevOptions
+    setWaterOptions((previousOptions) => {
+      const clickedOption = previousOptions.find(
+        (option) => option.id === optionId
+      )
 
-      const nextCheckedState = !clickedOption.checked
-
-      if (!nextCheckedState) {
-        return prevOptions.map((option) =>
-          option.valueMl >= clickedOption.valueMl
-            ? { ...option, checked: false }
-            : option
-        )
+      if (!clickedOption) {
+        return previousOptions
       }
 
-      return prevOptions.map((option) => ({
-        ...option,
-        checked: option.valueMl <= clickedOption.valueMl,
-      }))
+      if (!clickedOption.checked) {
+        return createWaterOptions(INITIAL_WATER_OPTIONS, clickedOption.valueMl)
+      }
+
+      const previousCheckedOption = [...previousOptions]
+        .filter(
+          (option) => option.checked && option.valueMl < clickedOption.valueMl
+        )
+        .at(-1)
+
+      return createWaterOptions(
+        INITIAL_WATER_OPTIONS,
+        previousCheckedOption?.valueMl ?? 0
+      )
     })
+  }
+
+  const handleWaterReset = () => {
+    clearStoredWaterSelection()
+    setWaterOptions(createWaterOptions(INITIAL_WATER_OPTIONS, 0))
+    toast.success("Controle de agua resetado para hoje.")
+  }
+
+  const handleClearTasks = () => {
+    if (tasks.length === 0) {
+      toast("Nenhuma tarefa para limpar.")
+      return
+    }
+
+    if (!window.confirm("Deseja realmente remover todas as tarefas?")) {
+      return
+    }
+
+    clearTasksMutation.mutate()
   }
 
   const handleDialogClosed = () => {
@@ -159,105 +185,101 @@ const HomePage = () => {
   }
 
   const waterSelectedMl = useMemo(() => {
-    const checkedOptions = waterOptions.filter((option) => option.checked)
-
-    if (checkedOptions.length === 0) return 0
-
-    return Math.max(...checkedOptions.map((option) => option.valueMl))
+    return Math.max(
+      0,
+      ...waterOptions
+        .filter((option) => option.checked)
+        .map((option) => option.valueMl)
+    )
   }, [waterOptions])
 
   const waterPercentage = Math.round((waterSelectedMl / WATER_GOAL_ML) * 100)
-
-  const sortedTasks = [...tasks].sort((a, b) => {
-    const statusOrder = {
-      in_progress: 0,
-      not_started: 1,
-      done: 2,
-    }
-
-    return statusOrder[a.status] - statusOrder[b.status]
-  })
-
-  const taskStats = tasks.reduce(
-    (acc, task) => {
-      acc.total += 1
-
-      if (task.status === "done") {
-        acc.completed += 1
-      }
-
-      if (task.status === "in_progress") {
-        acc.inProgress += 1
-      }
-
-      return acc
-    },
-    {
-      total: 0,
-      completed: 0,
-      inProgress: 0,
-    }
-  )
+  const sortedTasks = useMemo(() => sortTasks(tasks), [tasks])
+  const taskStats = useMemo(() => getTaskStats(tasks), [tasks])
 
   return (
-    <div className="flex min-h-screen flex-col bg-brand-background lg:flex-row">
-      <Toaster />
+    <main className="mx-auto w-full max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
+      <Header
+        subtitle="Dashboard"
+        title="Controle a rotina com mais clareza"
+        description="Uma visao consolidada das tarefas e do seu ritmo diario. Organize o que importa, acompanhe a execucao e mantenha a hidratacao em dia."
+        stats={[
+          {
+            label: "Tarefas ativas",
+            value: `${taskStats.total}`,
+          },
+          {
+            label: "Concluidas",
+            value: `${taskStats.completed}`,
+          },
+          {
+            label: "Em andamento",
+            value: `${taskStats.inProgress}`,
+          },
+        ]}
+        onClearTasks={handleClearTasks}
+        onOpenDialog={() => setAddTaskDialogIsOpen(true)}
+        clearDisabled={tasks.length === 0 || clearTasksMutation.isPending}
+      />
 
-      <div className="shrink-0 lg:w-72">
-        <Sidebar />
-      </div>
-
-      <main className="w-full flex-1 space-y-6 px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
-        <Header
-          subtitle="Dashboard"
-          title="Início"
-          onClearTasks={() => clearTasksMutation.mutate()}
-          onOpenDialog={() => setAddTaskDialogIsOpen(true)}
-        />
-
-        {isLoading && (
-          <p className="text-sm text-brand-text-gray">
+      {isLoading ? (
+        <section className="rounded-[2rem] border border-white/70 bg-white/85 p-8 shadow-card backdrop-blur">
+          <p className="text-sm text-brand-muted">
             Carregando dados do dashboard...
           </p>
-        )}
+        </section>
+      ) : null}
 
-        {isError && (
-          <p className="text-sm text-red-600">
+      {isError ? (
+        <section className="rounded-[2rem] border border-brand-danger/20 bg-white/85 p-8 shadow-card backdrop-blur">
+          <p className="text-sm text-brand-danger">
             Erro ao carregar dados: {error?.message || "desconhecido"}
           </p>
-        )}
+        </section>
+      ) : null}
 
-        {!isLoading && !isError && (
-          <>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
-              <Dashboard
-                icon={<TaskIcon />}
-                mainText={String(taskStats.total)}
-                secondaryText="Tarefas disponíveis"
-              />
+      {!isLoading && !isError ? (
+        <>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            <Dashboard
+              icon={<TaskIcon className="h-5 w-5" />}
+              mainText={String(taskStats.total)}
+              secondaryText="Tarefas disponiveis"
+              supportText={taskStats.total > 0 ? "Agenda viva" : "Comece agora"}
+            />
 
-              <Dashboard
-                icon={<TaskCheckIcon />}
-                mainText={String(taskStats.completed)}
-                secondaryText="Tarefas concluídas"
-              />
+            <Dashboard
+              icon={<TaskCheckIcon className="h-5 w-5" />}
+              mainText={String(taskStats.completed)}
+              secondaryText="Tarefas concluidas"
+              supportText={`${taskStats.completionRate}%`}
+            />
 
-              <Dashboard
-                icon={<LoaderIcon />}
-                mainText={String(taskStats.inProgress)}
-                secondaryText="Tarefas em andamento"
-              />
+            <Dashboard
+              icon={<LoaderIcon className="h-5 w-5" />}
+              mainText={String(taskStats.inProgress)}
+              secondaryText="Tarefas em andamento"
+              supportText="Foco atual"
+            />
 
-              <Dashboard
-                icon={<WaterIcon />}
-                mainText={`${waterPercentage}%`}
-                secondaryText="Água"
-              />
-            </div>
+            <Dashboard
+              icon={<WaterIcon className="h-5 w-5" />}
+              mainText={`${waterPercentage}%`}
+              secondaryText="Meta de agua"
+              supportText={`${waterSelectedMl} ml`}
+            />
+          </div>
 
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
+          {tasks.length === 0 ? (
+            <EmptyState
+              title="Seu painel ainda esta vazio"
+              description="Cadastre a primeira tarefa para transformar este projeto em um organizador real de rotina."
+            />
+          ) : (
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.85fr)_minmax(360px,1fr)]">
               <TaskSummaryCard
                 tasks={sortedTasks}
+                completionRate={taskStats.completionRate}
                 handleCheckboxClick={handleTaskCheckboxClick}
               />
 
@@ -265,20 +287,21 @@ const HomePage = () => {
                 options={waterOptions}
                 selectedMl={waterSelectedMl}
                 goalMl={WATER_GOAL_ML}
+                onReset={handleWaterReset}
                 onToggleOption={handleWaterOptionToggle}
               />
             </div>
-          </>
-        )}
+          )}
+        </>
+      ) : null}
 
-        <AddTaskDialog
-          isOpen={addTaskDialogIsOpen}
-          onClose={handleDialogClosed}
-          onSubmitSuccess={onTaskSubmitSuccess}
-          onSubmitError={onTaskSubmitError}
-        />
-      </main>
-    </div>
+      <AddTaskDialog
+        isOpen={addTaskDialogIsOpen}
+        onClose={handleDialogClosed}
+        onSubmitSuccess={onTaskSubmitSuccess}
+        onSubmitError={onTaskSubmitError}
+      />
+    </main>
   )
 }
 
