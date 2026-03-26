@@ -38,7 +38,7 @@ const TaskItem = ({
     statusStyles[task.status] ?? statusStyles.not_started
   const timeLabel =
     TASK_TIME_PERIODS.find((period) => period.value === task.time)?.label ??
-    "Sem periodo"
+    "Sem período"
 
   const handleDeleteClick = async () => {
     try {

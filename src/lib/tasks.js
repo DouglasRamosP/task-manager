@@ -2,15 +2,15 @@ const API_URL = import.meta.env.VITE_API_URL
 
 export const TASK_STATUS_META = {
   not_started: {
-    label: "Nao iniciada",
+    label: "Não iniciada",
     description: "Pronta para sair do papel",
   },
   in_progress: {
     label: "Em andamento",
-    description: "Ja esta em execucao",
+    description: "Já está em execução",
   },
   done: {
-    label: "Concluida",
+    label: "Concluída",
     description: "Finalizada com sucesso",
   },
 }
@@ -24,24 +24,24 @@ export const TASK_STATUS_ORDER = {
 export const TASK_TIME_PERIODS = [
   {
     value: "morning",
-    label: "Manha",
+    label: "Manhã",
     description: "Rotina de abertura e foco",
   },
   {
     value: "afternoon",
     label: "Tarde",
-    description: "Execucao e acompanhamento",
+    description: "Execução e acompanhamento",
   },
   {
     value: "evening",
     label: "Noite",
-    description: "Fechamento e revisao",
+    description: "Fechamento e revisão",
   },
 ]
 
 const ensureApiUrl = () => {
   if (!API_URL) {
-    throw new Error("A variavel VITE_API_URL nao foi configurada.")
+    throw new Error("A variável VITE_API_URL não foi configurada.")
   }
 }
 
@@ -64,7 +64,7 @@ const request = async (path, options = {}) => {
 
   const {
     body,
-    errorMessage = "Nao foi possivel concluir a solicitacao.",
+    errorMessage = "Não foi possível concluir a solicitação.",
     headers,
     ...rest
   } = options

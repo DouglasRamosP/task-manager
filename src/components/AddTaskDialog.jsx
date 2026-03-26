@@ -97,18 +97,18 @@ const AddTaskDialog = ({ isOpen, onClose, onSubmitSuccess, onSubmitError }) => {
             <div className="space-y-5 px-6 py-6 sm:px-8">
               <Input
                 id="title"
-                label="Titulo"
+                label="Título"
                 placeholder="Ex.: Revisar proposta do cliente"
                 {...register("title", {
-                  required: "O titulo e obrigatorio.",
+                  required: "O título é obrigatório.",
                   validate: (value) =>
-                    value.trim() !== "" || "O titulo nao pode ser vazio.",
+                    value.trim() !== "" || "O título não pode ser vazio.",
                 })}
                 error={errors.title}
               />
 
               <div className="flex flex-col gap-1.5 text-left">
-                <InputLabel htmlFor="time">Periodo do dia</InputLabel>
+                <InputLabel htmlFor="time">Período do dia</InputLabel>
                 <select
                   id="time"
                   className={[
@@ -120,10 +120,10 @@ const AddTaskDialog = ({ isOpen, onClose, onSubmitSuccess, onSubmitError }) => {
                     .filter(Boolean)
                     .join(" ")}
                   {...register("time", {
-                    required: "O periodo e obrigatorio.",
+                    required: "O período é obrigatório.",
                   })}
                 >
-                  <option value="">Selecione um periodo</option>
+                  <option value="">Selecione um período</option>
                   {TASK_TIME_PERIODS.map((period) => (
                     <option key={period.value} value={period.value}>
                       {period.label}
@@ -141,12 +141,12 @@ const AddTaskDialog = ({ isOpen, onClose, onSubmitSuccess, onSubmitError }) => {
               <Input
                 as="textarea"
                 id="description"
-                label="Descricao"
-                placeholder="Descreva o objetivo, contexto ou proximo passo."
+                label="Descrição"
+                placeholder="Descreva o objetivo, contexto ou próximo passo."
                 {...register("description", {
-                  required: "A descricao e obrigatoria.",
+                  required: "A descrição é obrigatória.",
                   validate: (value) =>
-                    value.trim() !== "" || "A descricao nao pode ser vazia.",
+                    value.trim() !== "" || "A descrição não pode ser vazia.",
                 })}
                 error={errors.description}
               />

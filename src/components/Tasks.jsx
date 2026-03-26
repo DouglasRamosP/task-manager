@@ -84,7 +84,7 @@ const Tasks = () => {
       if (variables.nextStatus === "in_progress") {
         toast.success("Tarefa iniciada com sucesso!")
       } else if (variables.nextStatus === "done") {
-        toast.success("Tarefa concluida com sucesso!")
+        toast.success("Tarefa concluída com sucesso!")
       } else {
         toast.success("Tarefa reiniciada com sucesso!")
       }
@@ -207,19 +207,19 @@ const Tasks = () => {
     <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
       <Header
         subtitle="Workspace"
-        title="Gerencie todas as tarefas em um unico lugar"
-        description="Filtre, revise e atualize o andamento dos itens da sua rotina. A tela foi organizada para funcionar melhor em uso continuo, nao apenas como demonstracao."
+        title="Gerencie todas as tarefas em um único lugar"
+        description="Filtre, revise e atualize o andamento dos itens da sua rotina. A tela foi organizada para funcionar melhor em uso contínuo, não apenas como demonstração."
         stats={[
           {
             label: "Total",
             value: `${taskStats.total}`,
           },
           {
-            label: "Visiveis",
+            label: "Visíveis",
             value: `${visibleTasksCount}`,
           },
           {
-            label: "Concluidas",
+            label: "Concluídas",
             value: `${taskStats.completed}`,
           },
         ]}
@@ -238,7 +238,7 @@ const Tasks = () => {
               className={fieldClassName}
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Busque por titulo ou descricao"
+              placeholder="Busque por título ou descrição"
               type="search"
             />
           </label>
@@ -279,7 +279,7 @@ const Tasks = () => {
           <div className="pt-6">
             <EmptyState
               title="Nenhuma tarefa cadastrada"
-              description="Crie a primeira tarefa para comecar a usar a lista de forma pratica no dia a dia."
+              description="Crie a primeira tarefa para começar a usar a lista de forma prática no dia a dia."
             />
           </div>
         ) : visibleTasksCount === 0 ? (
@@ -317,7 +317,7 @@ const Tasks = () => {
 
                   {group.tasks.length === 0 ? (
                     <p className="rounded-2xl bg-brand-background px-4 py-4 text-sm text-brand-muted">
-                      Nenhuma tarefa correspondente para este periodo.
+                      Nenhuma tarefa correspondente para este período.
                     </p>
                   ) : (
                     <div className="space-y-3">

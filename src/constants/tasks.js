@@ -9,14 +9,14 @@ const TASKS = [
   {
     id: 2,
     title: "Ler livro",
-    description: "Estudar matematica",
+    description: "Estudar matemática",
     time: "afternoon",
     status: "in_progress",
   },
   {
     id: 3,
     title: "Fazer compras",
-    description: "mercado da esquina",
+    description: "Mercado da esquina",
     time: "evening",
     status: "not_started",
   },

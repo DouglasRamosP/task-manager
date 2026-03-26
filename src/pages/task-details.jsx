@@ -154,8 +154,8 @@ const TaskDetailsPage = () => {
     return (
       <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
         <EmptyState
-          title="Tarefa nao encontrada"
-          description="Nao foi possivel localizar este item. Ele pode ter sido removido ou ainda nao estar disponivel."
+          title="Tarefa não encontrada"
+          description="Não foi possível localizar este item. Ele pode ter sido removido ou ainda não estar disponível."
           action={
             <Button
               color="secondary"
@@ -203,7 +203,7 @@ const TaskDetailsPage = () => {
               {task.title}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-brand-muted sm:text-base">
-              Edite os detalhes da tarefa, ajuste o periodo do dia e mantenha o
+              Edite os detalhes da tarefa, ajuste o período do dia e mantenha o
               status alinhado com o andamento real.
             </p>
           </div>
@@ -235,11 +235,11 @@ const TaskDetailsPage = () => {
             <div>
               <Input
                 id="title"
-                label="Titulo"
+                label="Título"
                 {...register("title", {
-                  required: "O titulo e obrigatorio.",
+                  required: "O título é obrigatório.",
                   validate: (value) => {
-                    if (!value.trim()) return "O titulo nao pode ser vazio."
+                    if (!value.trim()) return "O título não pode ser vazio."
                     return true
                   },
                 })}
@@ -248,12 +248,12 @@ const TaskDetailsPage = () => {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <InputLabel htmlFor="time">Periodo do dia</InputLabel>
+              <InputLabel htmlFor="time">Período do dia</InputLabel>
               <select
                 className={fieldClassName}
                 id="time"
                 {...register("time", {
-                  required: "O periodo e obrigatorio.",
+                  required: "O período é obrigatório.",
                 })}
               >
                 {TASK_TIME_PERIODS.map((period) => (
@@ -270,7 +270,7 @@ const TaskDetailsPage = () => {
                 className={fieldClassName}
                 id="status"
                 {...register("status", {
-                  required: "O status e obrigatorio.",
+                  required: "O status é obrigatório.",
                 })}
               >
                 {Object.entries(TASK_STATUS_META).map(([value, meta]) => (
@@ -285,11 +285,11 @@ const TaskDetailsPage = () => {
               <Input
                 as="textarea"
                 id="description"
-                label="Descricao"
+                label="Descrição"
                 {...register("description", {
-                  required: "A descricao e obrigatoria.",
+                  required: "A descrição é obrigatória.",
                   validate: (value) => {
-                    if (!value.trim()) return "A descricao nao pode ser vazia."
+                    if (!value.trim()) return "A descrição não pode ser vazia."
                     return true
                   },
                 })}
@@ -328,7 +328,7 @@ const TaskDetailsPage = () => {
         <aside className="space-y-6 rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-card backdrop-blur">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-primary">
-              Resumo rapido
+              Resumo rápido
             </p>
             <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-brand-ink">
               Contexto da tarefa
@@ -350,7 +350,7 @@ const TaskDetailsPage = () => {
 
             <div className="rounded-2xl bg-brand-background p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-muted">
-                Periodo
+                Período
               </p>
               <p className="mt-2 text-base font-semibold text-brand-ink">
                 {
@@ -371,8 +371,8 @@ const TaskDetailsPage = () => {
                 Dica de uso
               </p>
               <p className="mt-2 text-sm leading-7 text-brand-muted">
-                Use a descricao para registrar contexto suficiente para retomar
-                a tarefa rapidamente sem depender da memoria.
+                Use a descrição para registrar contexto suficiente para retomar
+                a tarefa rapidamente sem depender da memória.
               </p>
             </div>
           </div>

@@ -8,7 +8,7 @@ const TasksSeparator = ({ title, icon }) => {
       <div>
         <p className="text-lg font-semibold text-brand-ink">{title}</p>
         <p className="text-sm text-brand-muted">
-          Tarefas organizadas por periodo
+          Tarefas organizadas por período
         </p>
       </div>
     </div>

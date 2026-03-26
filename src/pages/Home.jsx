@@ -71,7 +71,7 @@ const HomePage = () => {
       if (variables.nextStatus === "in_progress") {
         toast.success("Tarefa iniciada com sucesso!")
       } else if (variables.nextStatus === "done") {
-        toast.success("Tarefa concluida com sucesso!")
+        toast.success("Tarefa concluída com sucesso!")
       } else {
         toast.success("Tarefa reiniciada com sucesso!")
       }
@@ -149,7 +149,7 @@ const HomePage = () => {
   const handleWaterReset = () => {
     clearStoredWaterSelection()
     setWaterOptions(createWaterOptions(INITIAL_WATER_OPTIONS, 0))
-    toast.success("Controle de agua resetado para hoje.")
+    toast.success("Controle de água resetado para hoje.")
   }
 
   const handleClearTasks = () => {
@@ -202,14 +202,14 @@ const HomePage = () => {
       <Header
         subtitle="Dashboard"
         title="Controle a rotina com mais clareza"
-        description="Uma visao consolidada das tarefas e do seu ritmo diario. Organize o que importa, acompanhe a execucao e mantenha a hidratacao em dia."
+        description="Uma visão consolidada das tarefas e do seu ritmo diário. Organize o que importa, acompanhe a execução e mantenha a hidratação em dia."
         stats={[
           {
             label: "Tarefas ativas",
             value: `${taskStats.total}`,
           },
           {
-            label: "Concluidas",
+            label: "Concluídas",
             value: `${taskStats.completed}`,
           },
           {
@@ -244,14 +244,14 @@ const HomePage = () => {
             <Dashboard
               icon={<TaskIcon className="h-5 w-5" />}
               mainText={String(taskStats.total)}
-              secondaryText="Tarefas disponiveis"
+              secondaryText="Tarefas disponíveis"
               supportText={taskStats.total > 0 ? "Agenda viva" : "Comece agora"}
             />
 
             <Dashboard
               icon={<TaskCheckIcon className="h-5 w-5" />}
               mainText={String(taskStats.completed)}
-              secondaryText="Tarefas concluidas"
+              secondaryText="Tarefas concluídas"
               supportText={`${taskStats.completionRate}%`}
             />
 
@@ -265,14 +265,14 @@ const HomePage = () => {
             <Dashboard
               icon={<WaterIcon className="h-5 w-5" />}
               mainText={`${waterPercentage}%`}
-              secondaryText="Meta de agua"
+              secondaryText="Meta de água"
               supportText={`${waterSelectedMl} ml`}
             />
           </div>
 
           {tasks.length === 0 ? (
             <EmptyState
-              title="Seu painel ainda esta vazio"
+              title="Seu painel ainda está vazio"
               description="Cadastre a primeira tarefa para transformar este projeto em um organizador real de rotina."
             />
           ) : (

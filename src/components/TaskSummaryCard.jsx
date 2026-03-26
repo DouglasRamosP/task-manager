@@ -13,7 +13,7 @@ const TaskSummaryCard = ({
       <div className="mb-6 flex flex-col gap-4 border-b border-brand-line pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-2xl font-semibold tracking-[-0.04em] text-brand-ink">
-            Visao geral das tarefas
+            Visão geral das tarefas
           </h2>
           <p className="mt-2 text-sm leading-6 text-brand-muted">
             Acompanhe as prioridades do dia e avance com clareza.
@@ -33,7 +33,7 @@ const TaskSummaryCard = ({
       {tasks.length === 0 ? (
         <EmptyState
           title="Nenhuma tarefa cadastrada"
-          description="Adicione a primeira tarefa para comecar a organizar a rotina e visualizar seu progresso por aqui."
+          description="Adicione a primeira tarefa para começar a organizar a rotina e visualizar seu progresso por aqui."
         />
       ) : (
         <div className="space-y-4">

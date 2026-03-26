@@ -23,10 +23,10 @@ const WaterGoalCard = ({
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h2 className="text-2xl font-semibold tracking-[-0.04em] text-brand-ink">
-            Meta de hidratacao
+            Meta de hidratação
           </h2>
           <p className="mt-2 text-sm leading-6 text-brand-muted">
-            Controle rapido da agua consumida ao longo do dia.
+            Controle rápido da água consumida ao longo do dia.
           </p>
         </div>
 
